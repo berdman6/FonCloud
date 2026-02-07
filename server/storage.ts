@@ -1,38 +1,334 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
+import {
+  type User,
+  type InsertUser,
+  type Transaction,
+  type Commission,
+  type Device,
+  type MarketListing,
+  type Withdrawal,
+  users,
+  transactions,
+  commissions,
+  devices,
+  marketListings,
+  withdrawals,
+  likes,
+} from "@shared/schema";
+import { eq, desc, and, sql } from "drizzle-orm";
+import { db } from "./db";
 
-// modify the interface with any CRUD methods
-// you might need
-
-export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+function generateId(length: number): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
+export interface IStorage {
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUserId(userId: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByReferralCode(referralCode: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUserBalance(userId: string, amount: number): Promise<void>;
+  incrementReferralCount(userId: string): Promise<void>;
 
-  constructor() {
-    this.users = new Map();
+  createTransaction(data: {
+    fromUserId: string;
+    toUserId: string;
+    amount: string;
+    type: string;
+    description?: string;
+  }): Promise<Transaction>;
+  getTransactionsByUserId(userId: string): Promise<Transaction[]>;
+
+  createCommission(data: {
+    userId: string;
+    fromUserId: string;
+    level: number;
+    amount: string;
+  }): Promise<Commission>;
+  getCommissionsByUserId(userId: string): Promise<Commission[]>;
+
+  createDevice(data: {
+    userId: string;
+    brand: string;
+    model: string;
+    specs: string;
+    value: string;
+  }): Promise<Device>;
+  getDevicesByUserId(userId: string): Promise<Device[]>;
+  getDeviceById(id: number): Promise<Device | undefined>;
+  updateDeviceListing(
+    id: number,
+    isListed: boolean,
+    listPrice: string | null,
+  ): Promise<void>;
+
+  createListing(data: {
+    deviceId: number;
+    sellerId: string;
+    sellerName: string;
+    brand: string;
+    model: string;
+    price: string;
+  }): Promise<MarketListing>;
+  getListings(): Promise<MarketListing[]>;
+  getListingById(id: number): Promise<MarketListing | undefined>;
+  updateListingLikes(id: number, delta: number): Promise<void>;
+  buyListing(id: number, buyerId: string): Promise<void>;
+
+  createWithdrawal(data: {
+    userId: string;
+    amount: string;
+    method: string;
+    accountDetails: string;
+  }): Promise<Withdrawal>;
+  getWithdrawalsByUserId(userId: string): Promise<Withdrawal[]>;
+
+  createLike(data: {
+    userId: string;
+    listingId: number;
+  }): Promise<{ id: number }>;
+  getLikeByUserAndListing(
+    userId: string,
+    listingId: number,
+  ): Promise<{ id: number } | undefined>;
+  deleteLike(id: number): Promise<void>;
+}
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async getUserByUserId(userId: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.userId, userId));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
+    return user;
+  }
+
+  async getUserByReferralCode(referralCode: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.referralCode, referralCode));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const userId = generateId(6);
+    const referralCode = generateId(8);
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        userId,
+        referralCode,
+      })
+      .returning();
     return user;
+  }
+
+  async updateUserBalance(userId: string, amount: number): Promise<void> {
+    if (amount >= 0) {
+      await db
+        .update(users)
+        .set({
+          walletBalance: sql`${users.walletBalance} + ${amount.toFixed(2)}`,
+          totalEarnings: sql`${users.totalEarnings} + ${amount.toFixed(2)}`,
+        })
+        .where(eq(users.userId, userId));
+    } else {
+      await db
+        .update(users)
+        .set({
+          walletBalance: sql`${users.walletBalance} + ${amount.toFixed(2)}`,
+        })
+        .where(eq(users.userId, userId));
+    }
+  }
+
+  async incrementReferralCount(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        totalReferrals: sql`${users.totalReferrals} + 1`,
+      })
+      .where(eq(users.userId, userId));
+  }
+
+  async createTransaction(data: {
+    fromUserId: string;
+    toUserId: string;
+    amount: string;
+    type: string;
+    description?: string;
+  }): Promise<Transaction> {
+    const [tx] = await db.insert(transactions).values(data).returning();
+    return tx;
+  }
+
+  async getTransactionsByUserId(userId: string): Promise<Transaction[]> {
+    return db
+      .select()
+      .from(transactions)
+      .where(
+        sql`${transactions.fromUserId} = ${userId} OR ${transactions.toUserId} = ${userId}`,
+      )
+      .orderBy(desc(transactions.createdAt));
+  }
+
+  async createCommission(data: {
+    userId: string;
+    fromUserId: string;
+    level: number;
+    amount: string;
+  }): Promise<Commission> {
+    const [c] = await db.insert(commissions).values(data).returning();
+    return c;
+  }
+
+  async getCommissionsByUserId(userId: string): Promise<Commission[]> {
+    return db
+      .select()
+      .from(commissions)
+      .where(eq(commissions.userId, userId))
+      .orderBy(desc(commissions.createdAt));
+  }
+
+  async createDevice(data: {
+    userId: string;
+    brand: string;
+    model: string;
+    specs: string;
+    value: string;
+  }): Promise<Device> {
+    const [d] = await db.insert(devices).values(data).returning();
+    return d;
+  }
+
+  async getDevicesByUserId(userId: string): Promise<Device[]> {
+    return db
+      .select()
+      .from(devices)
+      .where(eq(devices.userId, userId))
+      .orderBy(desc(devices.createdAt));
+  }
+
+  async getDeviceById(id: number): Promise<Device | undefined> {
+    const [d] = await db.select().from(devices).where(eq(devices.id, id));
+    return d;
+  }
+
+  async updateDeviceListing(
+    id: number,
+    isListed: boolean,
+    listPrice: string | null,
+  ): Promise<void> {
+    await db
+      .update(devices)
+      .set({ isListed, listPrice })
+      .where(eq(devices.id, id));
+  }
+
+  async createListing(data: {
+    deviceId: number;
+    sellerId: string;
+    sellerName: string;
+    brand: string;
+    model: string;
+    price: string;
+  }): Promise<MarketListing> {
+    const [l] = await db.insert(marketListings).values(data).returning();
+    return l;
+  }
+
+  async getListings(): Promise<MarketListing[]> {
+    return db
+      .select()
+      .from(marketListings)
+      .where(eq(marketListings.isSold, false))
+      .orderBy(desc(marketListings.createdAt));
+  }
+
+  async getListingById(id: number): Promise<MarketListing | undefined> {
+    const [l] = await db
+      .select()
+      .from(marketListings)
+      .where(eq(marketListings.id, id));
+    return l;
+  }
+
+  async updateListingLikes(id: number, delta: number): Promise<void> {
+    await db
+      .update(marketListings)
+      .set({
+        likes: sql`${marketListings.likes} + ${delta}`,
+      })
+      .where(eq(marketListings.id, id));
+  }
+
+  async buyListing(id: number, buyerId: string): Promise<void> {
+    await db
+      .update(marketListings)
+      .set({ isSold: true, buyerId })
+      .where(eq(marketListings.id, id));
+  }
+
+  async createWithdrawal(data: {
+    userId: string;
+    amount: string;
+    method: string;
+    accountDetails: string;
+  }): Promise<Withdrawal> {
+    const [w] = await db.insert(withdrawals).values(data).returning();
+    return w;
+  }
+
+  async getWithdrawalsByUserId(userId: string): Promise<Withdrawal[]> {
+    return db
+      .select()
+      .from(withdrawals)
+      .where(eq(withdrawals.userId, userId))
+      .orderBy(desc(withdrawals.createdAt));
+  }
+
+  async createLike(data: {
+    userId: string;
+    listingId: number;
+  }): Promise<{ id: number }> {
+    const [l] = await db.insert(likes).values(data).returning({ id: likes.id });
+    return l;
+  }
+
+  async getLikeByUserAndListing(
+    userId: string,
+    listingId: number,
+  ): Promise<{ id: number } | undefined> {
+    const [l] = await db
+      .select({ id: likes.id })
+      .from(likes)
+      .where(and(eq(likes.userId, userId), eq(likes.listingId, listingId)));
+    return l;
+  }
+
+  async deleteLike(id: number): Promise<void> {
+    await db.delete(likes).where(eq(likes.id, id));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
