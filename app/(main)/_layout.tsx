@@ -15,9 +15,10 @@ interface DrawerItemProps {
   route: string;
   active: boolean;
   onPress: () => void;
+  badge?: number;
 }
 
-function DrawerItem({ icon, label, active, onPress }: DrawerItemProps) {
+function DrawerItem({ icon, label, active, onPress, badge }: DrawerItemProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -29,6 +30,11 @@ function DrawerItem({ icon, label, active, onPress }: DrawerItemProps) {
     >
       {icon}
       <Text style={[styles.drawerItemText, active && styles.drawerItemTextActive]}>{label}</Text>
+      {badge !== undefined && badge > 0 && (
+        <View style={styles.drawerBadge}>
+          <Text style={styles.drawerBadgeText}>{badge > 9 ? '9+' : badge}</Text>
+        </View>
+      )}
       {active && <View style={styles.activeIndicator} />}
     </Pressable>
   );
@@ -80,6 +86,7 @@ export default function MainLayout() {
     { icon: <Ionicons name="arrow-down-circle-outline" size={22} color={pathname.includes('withdrawal') ? Colors.dark.primary : Colors.dark.textSecondary} />, label: t('withdrawals'), route: '/(main)/withdrawals' },
     { icon: <Ionicons name="people-outline" size={22} color={pathname.includes('referral') ? Colors.dark.primary : Colors.dark.textSecondary} />, label: t('referrals'), route: '/(main)/referrals' },
     { icon: <Ionicons name="person-outline" size={22} color={pathname.includes('profile') ? Colors.dark.primary : Colors.dark.textSecondary} />, label: t('profile'), route: '/(main)/profile' },
+    { icon: <Ionicons name="notifications-outline" size={22} color={pathname.includes('notification') ? Colors.dark.primary : Colors.dark.textSecondary} />, label: t('notifications'), route: '/(main)/notifications', badge: unreadCount },
   ];
 
   return (
@@ -96,7 +103,7 @@ export default function MainLayout() {
             </Pressable>
           ),
           headerRight: () => (
-            <Pressable onPress={() => navigateTo('/(main)/home')} style={styles.bellBtn}>
+            <Pressable onPress={() => navigateTo('/(main)/notifications')} style={styles.bellBtn}>
               <Ionicons name="notifications-outline" size={22} color={Colors.dark.primary} />
               {unreadCount > 0 && (
                 <View style={styles.bellBadge}>
@@ -116,6 +123,7 @@ export default function MainLayout() {
         <Stack.Screen name="withdrawals" options={{ title: t('withdrawals') }} />
         <Stack.Screen name="referrals" options={{ title: t('referrals') }} />
         <Stack.Screen name="profile" options={{ title: t('profile') }} />
+        <Stack.Screen name="notifications" options={{ title: t('notifications') }} />
       </Stack>
 
       {drawerOpen && (
@@ -140,7 +148,7 @@ export default function MainLayout() {
             <View style={styles.drawerDivider} />
 
             <ScrollView style={styles.drawerMenu} showsVerticalScrollIndicator={false}>
-              {menuItems.map((item) => (
+              {menuItems.map((item: any) => (
                 <DrawerItem
                   key={item.route}
                   icon={item.icon}
@@ -148,6 +156,7 @@ export default function MainLayout() {
                   route={item.route}
                   active={pathname.includes(item.route.split('/').pop() || '')}
                   onPress={() => navigateTo(item.route)}
+                  badge={item.badge}
                 />
               ))}
             </ScrollView>
@@ -343,5 +352,19 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.primary,
+  },
+  drawerBadge: {
+    backgroundColor: Colors.dark.danger,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 5,
+  },
+  drawerBadgeText: {
+    fontSize: 10,
+    fontFamily: 'HindSiliguri_700Bold',
+    color: '#FFFFFF',
   },
 });

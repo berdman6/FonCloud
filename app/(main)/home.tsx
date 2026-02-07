@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform, RefreshControl, Modal, FlatList } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, RefreshControl } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +8,8 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, with
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
-import { useNotifications, AppNotification } from '@/lib/notifications-context';
+import { useNotifications } from '@/lib/notifications-context';
+import type { AppNotification } from '@/lib/notifications-context';
 import { GlowCard } from '@/components/GlowCard';
 import { PortalAnimation } from '@/components/PortalAnimation';
 import { FloatingBackground } from '@/components/FloatingBackground';
@@ -147,15 +148,15 @@ function NotificationToast({ notification, onDismiss, onPress }: { notification:
   return (
     <Animated.View style={[styles.toastContainer, animStyle]}>
       <Pressable onPress={onPress} style={styles.toastContent}>
-        <View style={styles.toastIconWrap}>
-          <Ionicons name="cart" size={20} color="#FFFFFF" />
+        <View style={[styles.toastIconWrap, { backgroundColor: notification.iconColor }]}>
+          <Ionicons name={notification.icon as any} size={20} color="#FFFFFF" />
         </View>
         <View style={styles.toastBody}>
           <Text style={styles.toastTitle} numberOfLines={1}>
-            {notification.countryFlag} {notification.buyerName}
+            {notification.title}
           </Text>
           <Text style={styles.toastMessage} numberOfLines={1}>
-            {notification.deviceModel} - {notification.price} credits
+            {notification.message}
           </Text>
         </View>
         <Pressable onPress={onDismiss} hitSlop={8}>
@@ -166,48 +167,12 @@ function NotificationToast({ notification, onDismiss, onPress }: { notification:
   );
 }
 
-function NotificationItem({ item, onPress }: { item: AppNotification; onPress: (id: string) => void }) {
-  const timeAgo = () => {
-    const diff = Date.now() - new Date(item.createdAt).getTime();
-    const secs = Math.floor(diff / 1000);
-    if (secs < 60) return `${secs}s`;
-    const mins = Math.floor(secs / 60);
-    if (mins < 60) return `${mins}m`;
-    const hrs = Math.floor(mins / 60);
-    return `${hrs}h`;
-  };
-
-  return (
-    <Pressable
-      onPress={() => onPress(item.id)}
-      style={[styles.notifItem, !item.isRead && styles.notifItemUnread]}
-    >
-      <View style={[styles.notifIconWrap, !item.isRead && { backgroundColor: Colors.dark.primaryDim }]}>
-        <Ionicons name="cart" size={18} color={Colors.dark.primary} />
-      </View>
-      <View style={styles.notifContent}>
-        <View style={styles.notifRow}>
-          <Text style={styles.notifFlag}>{item.countryFlag}</Text>
-          <Text style={[styles.notifBuyer, !item.isRead && { color: Colors.dark.text }]} numberOfLines={1}>{item.buyerName}</Text>
-          <Text style={styles.notifTime}>{timeAgo()}</Text>
-        </View>
-        <Text style={styles.notifDevice} numberOfLines={1}>
-          {item.brand} {item.deviceModel}
-        </Text>
-        <Text style={styles.notifPrice}>{item.price} credits</Text>
-      </View>
-      {!item.isRead && <View style={styles.notifDot} />}
-    </Pressable>
-  );
-}
-
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { user, refreshUser } = useAuth();
   const { t } = useLanguage();
-  const { notifications, unreadCount, markAsRead, markAllAsRead, latestUnread, dismissLatest } = useNotifications();
+  const { unreadCount, latestUnread, dismissLatest } = useNotifications();
   const [refreshing, setRefreshing] = React.useState(false);
-  const [showNotifModal, setShowNotifModal] = useState(false);
 
   const { data: devicesData } = useQuery<any>({
     queryKey: ['/api/manufacturing/devices'],
@@ -244,20 +209,16 @@ export default function HomeScreen() {
 
   const chartData = dashboardData?.last7Days || [];
 
-  const handleNotifPress = (id: string) => {
-    markAsRead(id);
-  };
-
   const handleToastPress = () => {
     dismissLatest();
-    setShowNotifModal(true);
+    router.push('/(main)/notifications' as any);
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.dark.background }}>
       <FloatingBackground />
 
-      {latestUnread && !showNotifModal && (
+      {latestUnread && (
         <NotificationToast
           notification={latestUnread}
           onDismiss={dismissLatest}
@@ -279,7 +240,7 @@ export default function HomeScreen() {
         </View>
 
         {unreadCount > 0 && (
-          <Pressable onPress={() => setShowNotifModal(true)} style={styles.notifBanner}>
+          <Pressable onPress={() => router.push('/(main)/notifications' as any)} style={styles.notifBanner}>
             <View style={styles.notifBannerLeft}>
               <Ionicons name="notifications" size={18} color={Colors.dark.accent} />
               <Text style={styles.notifBannerText}>
@@ -365,46 +326,6 @@ export default function HomeScreen() {
       )}
       </ScrollView>
 
-      <Modal visible={showNotifModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { paddingTop: insets.top + (Platform.OS === 'web' ? 67 : 10) }]}>
-            <View style={styles.modalHeader}>
-              <View style={styles.modalTitleRow}>
-                <Ionicons name="notifications" size={22} color={Colors.dark.primary} />
-                <Text style={styles.modalTitle}>{t('notifications')}</Text>
-              </View>
-              <View style={styles.modalActions}>
-                {unreadCount > 0 && (
-                  <Pressable onPress={markAllAsRead} style={styles.markAllBtn}>
-                    <Ionicons name="checkmark-done" size={18} color={Colors.dark.primary} />
-                  </Pressable>
-                )}
-                <Pressable onPress={() => setShowNotifModal(false)} hitSlop={8}>
-                  <Ionicons name="close" size={24} color={Colors.dark.text} />
-                </Pressable>
-              </View>
-            </View>
-
-            {notifications.length === 0 ? (
-              <View style={styles.notifEmpty}>
-                <Ionicons name="notifications-off-outline" size={48} color={Colors.dark.textMuted} />
-                <Text style={styles.notifEmptyText}>{t('noNotifications')}</Text>
-              </View>
-            ) : (
-              <FlatList
-                data={notifications}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <NotificationItem item={item} onPress={handleNotifPress} />
-                )}
-                contentContainerStyle={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }}
-                showsVerticalScrollIndicator={false}
-                ItemSeparatorComponent={() => <View style={styles.notifSeparator} />}
-              />
-            )}
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -755,123 +676,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
     color: 'rgba(255,255,255,0.8)',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    marginTop: 40,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.divider,
-  },
-  modalTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.text,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  markAllBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.dark.primaryDim,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  notifEmpty: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  notifEmptyText: {
-    fontSize: 14,
-    fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
-  },
-  notifItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    gap: 12,
-  },
-  notifItemUnread: {
-    backgroundColor: 'rgba(91, 140, 62, 0.06)',
-  },
-  notifIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.dark.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
-  },
-  notifContent: {
-    flex: 1,
-    gap: 2,
-  },
-  notifRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  notifFlag: {
-    fontSize: 16,
-  },
-  notifBuyer: {
-    fontSize: 13,
-    fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.textSecondary,
-    flex: 1,
-  },
-  notifTime: {
-    fontSize: 11,
-    fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
-  },
-  notifDevice: {
-    fontSize: 12,
-    fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textSecondary,
-  },
-  notifPrice: {
-    fontSize: 13,
-    fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
-  },
-  notifDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.dark.primary,
-  },
-  notifSeparator: {
-    height: 1,
-    backgroundColor: Colors.dark.divider,
-    marginLeft: 72,
   },
 });
