@@ -35,6 +35,13 @@ const translations: { [key in Language]: Translations } = {
     enterUsername: 'ব্যবহারকারীর নাম প্রবেশ করুন',
     enterPassword: 'পাসওয়ার্ড প্রবেশ করুন',
     enterDisplayName: 'প্রদর্শন নাম প্রবেশ করুন',
+    email: 'ইমেইল',
+    phone: 'ফোন নম্বর',
+    enterEmail: 'ইমেইল প্রবেশ করুন',
+    enterPhone: 'ফোন নম্বর প্রবেশ করুন',
+    loginWith: 'লগইন করুন',
+    usernameEmailPhone: 'ইউজারনেম / ইমেইল / ফোন',
+    optional: '(ঐচ্ছিক)',
 
     // Navigation/Drawer
     home: 'হোম',
@@ -210,6 +217,13 @@ const translations: { [key in Language]: Translations } = {
     enterUsername: 'Enter username',
     enterPassword: 'Enter password',
     enterDisplayName: 'Enter display name',
+    email: 'Email',
+    phone: 'Phone Number',
+    enterEmail: 'Enter email',
+    enterPhone: 'Enter phone number',
+    loginWith: 'Login',
+    usernameEmailPhone: 'Username / Email / Phone',
+    optional: '(optional)',
 
     // Navigation/Drawer
     home: 'Home',

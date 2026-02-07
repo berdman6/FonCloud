@@ -59,12 +59,13 @@ export default function LoginScreen() {
             <Ionicons name="person-outline" size={20} color={Colors.dark.textMuted} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder={t('enterUsername')}
+              placeholder={t('usernameEmailPhone')}
               placeholderTextColor={Colors.dark.textMuted}
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
               autoCorrect={false}
+              keyboardType="default"
             />
           </View>
 

@@ -15,6 +15,8 @@ export default function RegisterScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -30,7 +32,7 @@ export default function RegisterScreen() {
     }
     setLoading(true);
     try {
-      await register(username.trim(), password, displayName.trim(), referralCode.trim().toUpperCase());
+      await register(username.trim(), password, displayName.trim(), referralCode.trim().toUpperCase(), email.trim(), phone.trim());
       router.replace('/(main)/home');
     } catch (err: any) {
       Alert.alert('Error', err.message || 'Registration failed');
@@ -82,6 +84,32 @@ export default function RegisterScreen() {
               onChangeText={setUsername}
               autoCapitalize="none"
               autoCorrect={false}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="mail-outline" size={20} color={Colors.dark.textMuted} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder={`${t('enterEmail')} ${t('optional')}`}
+              placeholderTextColor={Colors.dark.textMuted}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoCorrect={false}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="call-outline" size={20} color={Colors.dark.textMuted} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder={`${t('enterPhone')} ${t('optional')}`}
+              placeholderTextColor={Colors.dark.textMuted}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
             />
           </View>
 
