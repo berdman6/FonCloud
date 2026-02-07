@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, ReactNode } from 'react';
 import { useAuth } from './auth-context';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiRequest, getApiUrl } from './query-client';
+import { fetch } from 'expo/fetch';
 import Colors from '@/constants/colors';
 
 const BUYER_NAMES = [
@@ -88,28 +91,66 @@ function createNotification(type: NotificationType, title: string, message: stri
   };
 }
 
-const RANDOM_BUYER_NAMES = [
-  'Alex Turner', 'Nina Patel', 'Kenji Watanabe', 'Rosa Martinez',
-  'Viktor Petrov', 'Amina Diallo', 'Luca Romano', 'Suki Park',
-];
+function mapServerNotification(n: any): AppNotification {
+  const type = (n.type || 'login') as NotificationType;
+  const config = NOTIFICATION_CONFIG[type] || NOTIFICATION_CONFIG.login;
+  return {
+    id: `srv_${n.id}`,
+    type,
+    title: n.title,
+    message: n.message,
+    icon: config.icon,
+    iconColor: config.iconColor,
+    isRead: n.isRead || n.is_read || false,
+    createdAt: new Date(n.createdAt || n.created_at),
+  };
+}
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const queryClient = useQueryClient();
+  const [clientNotifications, setClientNotifications] = useState<AppNotification[]>([]);
   const [latestUnread, setLatestUnread] = useState<AppNotification | null>(null);
-  const backgroundTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const soldTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const loginNotifSentRef = useRef<number | null>(null);
+  const prevServerCountRef = useRef<number>(0);
 
-  const pushNotification = useCallback((notif: AppNotification) => {
-    setNotifications(prev => [notif, ...prev].slice(0, 100));
+  const { data: serverNotifications } = useQuery<any[]>({
+    queryKey: ['/api/notifications'],
+    enabled: !!user,
+    refetchInterval: 15000,
+    staleTime: 10000,
+  });
+
+  const mappedServerNotifs = useMemo(() => {
+    if (!serverNotifications) return [];
+    return serverNotifications.map(mapServerNotification);
+  }, [serverNotifications]);
+
+  useEffect(() => {
+    if (mappedServerNotifs.length > prevServerCountRef.current && prevServerCountRef.current > 0) {
+      const newest = mappedServerNotifs[0];
+      if (newest && !newest.isRead) {
+        setLatestUnread(newest);
+      }
+    }
+    prevServerCountRef.current = mappedServerNotifs.length;
+  }, [mappedServerNotifs]);
+
+  const allNotifications = useMemo(() => {
+    const merged = [...clientNotifications, ...mappedServerNotifs];
+    merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return merged.slice(0, 100);
+  }, [clientNotifications, mappedServerNotifs]);
+
+  const pushClientNotification = useCallback((notif: AppNotification) => {
+    setClientNotifications(prev => [notif, ...prev].slice(0, 50));
     setLatestUnread(notif);
   }, []);
 
   const addNotification = useCallback((type: NotificationType, title: string, message: string) => {
     const notif = createNotification(type, title, message);
-    pushNotification(notif);
-  }, [pushNotification]);
+    pushClientNotification(notif);
+  }, [pushClientNotification]);
 
   const scheduleDeviceSoldNotifs = useCallback((deviceModel: string, brand: string) => {
     const intervals = [
@@ -132,77 +173,54 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         const title = `${country.flag} ${buyer}`;
         const message = `${brand} ${deviceModel} - 50 credits`;
         const notif = createNotification('device_sold', title, message);
-        pushNotification(notif);
+        pushClientNotification(notif);
       }, cumulative);
       soldTimersRef.current.push(timer);
     });
-  }, [pushNotification]);
+  }, [pushClientNotification]);
 
   useEffect(() => {
     if (!user) {
-      setNotifications([]);
+      setClientNotifications([]);
       setLatestUnread(null);
       soldTimersRef.current.forEach(t => clearTimeout(t));
       soldTimersRef.current = [];
-      if (backgroundTimerRef.current) clearTimeout(backgroundTimerRef.current);
-      loginNotifSentRef.current = null;
+      prevServerCountRef.current = 0;
       return;
     }
 
-    if (loginNotifSentRef.current !== user.id) {
-      loginNotifSentRef.current = user.id;
-      const loginNotif = createNotification('login', 'Welcome Back', 'You have successfully logged in.');
-      pushNotification(loginNotif);
-    }
-
-    const scheduleBackground = () => {
-      const delay = 120000 + Math.random() * 180000;
-      backgroundTimerRef.current = setTimeout(() => {
-        const types: NotificationType[] = ['commission', 'referral'];
-        const type = types[Math.floor(Math.random() * types.length)];
-
-        if (type === 'commission') {
-          const amount = (5 + Math.random() * 25).toFixed(2);
-          const notif = createNotification('commission', 'Commission Received', `${amount} credits from referral`);
-          pushNotification(notif);
-        } else {
-          const name = RANDOM_BUYER_NAMES[Math.floor(Math.random() * RANDOM_BUYER_NAMES.length)];
-          const notif = createNotification('referral', 'New Referral', `${name} joined using your referral code`);
-          pushNotification(notif);
-        }
-
-        scheduleBackground();
-      }, delay);
-    };
-
-    const initialDelay = setTimeout(() => {
-      scheduleBackground();
-    }, 15000);
-
     return () => {
-      clearTimeout(initialDelay);
-      if (backgroundTimerRef.current) clearTimeout(backgroundTimerRef.current);
       soldTimersRef.current.forEach(t => clearTimeout(t));
       soldTimersRef.current = [];
     };
   }, [user?.id]);
 
-  const unreadCount = useMemo(() => notifications.filter(n => !n.isRead).length, [notifications]);
+  const unreadCount = useMemo(() => allNotifications.filter(n => !n.isRead).length, [allNotifications]);
 
   const markAsRead = useCallback((id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-  }, []);
+    if (id.startsWith('srv_')) {
+      const serverId = id.replace('srv_', '');
+      apiRequest('POST', `/api/notifications/${serverId}/read`).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+      }).catch(() => {});
+    } else {
+      setClientNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    }
+  }, [queryClient]);
 
   const markAllAsRead = useCallback(() => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-  }, []);
+    setClientNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    apiRequest('POST', '/api/notifications/read-all').then(() => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+    }).catch(() => {});
+  }, [queryClient]);
 
   const dismissLatest = useCallback(() => {
     setLatestUnread(null);
   }, []);
 
   const value = useMemo(() => ({
-    notifications,
+    notifications: allNotifications,
     unreadCount,
     markAsRead,
     markAllAsRead,
@@ -210,7 +228,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     dismissLatest,
     addNotification,
     scheduleDeviceSoldNotifs,
-  }), [notifications, unreadCount, markAsRead, markAllAsRead, latestUnread, dismissLatest, addNotification, scheduleDeviceSoldNotifs]);
+  }), [allNotifications, unreadCount, markAsRead, markAllAsRead, latestUnread, dismissLatest, addNotification, scheduleDeviceSoldNotifs]);
 
   return (
     <NotificationsContext.Provider value={value}>

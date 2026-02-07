@@ -209,6 +209,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             description: `Level ${level} referral commission`,
           });
 
+          await storage.createNotification({
+            userId: currentReferrer.userId,
+            type: 'commission',
+            title: 'Commission Earned!',
+            message: `You earned ${commissionAmount.toFixed(2)} credits (Level ${level}) from ${displayName}'s signup.`,
+          });
+
           if (currentReferrer.referredBy) {
             const nextReferrer = await storage.getUserByUserId(
               currentReferrer.referredBy,
@@ -221,6 +228,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       req.session.userId = newUser.userId;
+
+      await storage.createNotification({
+        userId: newUser.userId,
+        type: 'signup',
+        title: 'Welcome to FonCloud!',
+        message: `Your account has been created successfully. Start manufacturing devices to earn credits!`,
+      });
+
+      if (referrer) {
+        await storage.createNotification({
+          userId: referrer.userId,
+          type: 'referral',
+          title: 'New Referral!',
+          message: `${displayName} joined using your referral code.`,
+        });
+      }
 
       const freshUser = await storage.getUserByUserId(newUser.userId);
       return res.json({
@@ -262,6 +285,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       req.session.userId = user.userId;
+
+      await storage.createNotification({
+        userId: user.userId,
+        type: 'login',
+        title: 'Login Successful',
+        message: `Welcome back, ${user.displayName}!`,
+      });
 
       return res.json({
         user: {
@@ -359,6 +389,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           amount: amount.toFixed(2),
           type: "transfer",
           description: `Transfer to ${recipient.displayName}`,
+        });
+
+        await storage.createNotification({
+          userId: recipient.userId,
+          type: 'transfer',
+          title: 'Transfer Received!',
+          message: `${sender.displayName} sent you ${amount.toFixed(2)} credits.`,
+        });
+
+        await storage.createNotification({
+          userId: sender.userId,
+          type: 'transfer',
+          title: 'Transfer Sent',
+          message: `You sent ${amount.toFixed(2)} credits to ${recipient.displayName}.`,
         });
 
         const updatedSender = await storage.getUserByUserId(sender.userId);
@@ -720,6 +764,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: `Withdrawal via ${method}`,
         });
 
+        await storage.createNotification({
+          userId: user.userId,
+          type: 'withdrawal',
+          title: 'Withdrawal Requested',
+          message: `Your withdrawal of ${amount.toFixed(2)} credits via ${method} has been submitted.`,
+        });
+
         return res.json({
           withdrawal: {
             ...withdrawal,
@@ -787,6 +838,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
           amount: toNum(c.amount),
         })),
       );
+    },
+  );
+
+  // ===== NOTIFICATION ROUTES =====
+
+  app.get(
+    "/api/notifications",
+    requireAuth,
+    async (req: Request, res: Response) => {
+      const list = await storage.getNotificationsByUserId(req.session.userId!);
+      return res.json(list);
+    },
+  );
+
+  app.get(
+    "/api/notifications/unread-count",
+    requireAuth,
+    async (req: Request, res: Response) => {
+      const count = await storage.getUnreadNotificationCount(req.session.userId!);
+      return res.json({ count });
+    },
+  );
+
+  app.post(
+    "/api/notifications/:id/read",
+    requireAuth,
+    async (req: Request, res: Response) => {
+      const id = parseInt(req.params.id as string);
+      await storage.markNotificationRead(id, req.session.userId!);
+      return res.json({ success: true });
+    },
+  );
+
+  app.post(
+    "/api/notifications/read-all",
+    requireAuth,
+    async (req: Request, res: Response) => {
+      await storage.markAllNotificationsRead(req.session.userId!);
+      return res.json({ success: true });
     },
   );
 
