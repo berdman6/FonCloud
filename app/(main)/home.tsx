@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Platform, RefreshControl } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, withRepeat, withSequence, Easing, interpolate } from 'react-native-reanimated';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth-context';
@@ -11,20 +12,40 @@ import { GlowCard } from '@/components/GlowCard';
 import { PortalAnimation } from '@/components/PortalAnimation';
 import Colors from '@/constants/colors';
 
-function QuickAction({ icon, label, route, delay }: { icon: React.ReactNode; label: string; route: string; delay: number }) {
+const ACTION_THEMES = [
+  { gradient: ['#5B8C3E', '#3D6B28'] as const, shadowColor: '#5B8C3E' },
+  { gradient: ['#F5A623', '#E08D0D'] as const, shadowColor: '#F5A623' },
+  { gradient: ['#4A90D9', '#2C6DB5'] as const, shadowColor: '#4A90D9' },
+  { gradient: ['#E25B45', '#C43E2A'] as const, shadowColor: '#E25B45' },
+];
+
+function QuickAction({ icon, label, route, delay, themeIndex }: { icon: React.ReactNode; label: string; route: string; delay: number; themeIndex: number }) {
   const scale = useSharedValue(0);
+  const theme = ACTION_THEMES[themeIndex % ACTION_THEMES.length];
   useEffect(() => {
-    scale.value = withDelay(delay, withTiming(1, { duration: 400, easing: Easing.out(Easing.back(1.5)) }));
+    scale.value = withDelay(delay, withTiming(1, { duration: 500, easing: Easing.out(Easing.back(1.7)) }));
   }, []);
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
     opacity: scale.value,
   }));
   return (
-    <Animated.View style={animStyle}>
-      <Pressable onPress={() => router.push(route as any)} style={({ pressed }) => [styles.actionCard, pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] }]}>
-        <View style={styles.actionIcon}>{icon}</View>
+    <Animated.View style={[animStyle, { flexGrow: 1, flexBasis: '45%' }]}>
+      <Pressable onPress={() => router.push(route as any)} style={({ pressed }) => [styles.actionCard, pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] }]}>
+        <View style={[styles.actionIconWrap, { shadowColor: theme.shadowColor }]}>
+          <LinearGradient
+            colors={[theme.gradient[0], theme.gradient[1]]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.actionIconGradient}
+          >
+            {icon}
+          </LinearGradient>
+        </View>
         <Text style={styles.actionLabel}>{label}</Text>
+        <View style={styles.actionArrow}>
+          <Feather name="chevron-right" size={14} color={Colors.dark.textMuted} />
+        </View>
       </Pressable>
     </Animated.View>
   );
@@ -109,10 +130,10 @@ export default function HomeScreen() {
 
       <Text style={styles.sectionTitle}>{t('quickActions')}</Text>
       <View style={styles.actionsGrid}>
-        <QuickAction icon={<MaterialCommunityIcons name="factory" size={24} color={Colors.dark.primary} />} label={t('manufacturing')} route="/(main)/manufacturing" delay={0} />
-        <QuickAction icon={<Ionicons name="wallet-outline" size={24} color={Colors.dark.primary} />} label={t('wallet')} route="/(main)/wallet" delay={100} />
-        <QuickAction icon={<Ionicons name="storefront-outline" size={24} color={Colors.dark.primary} />} label={t('marketplace')} route="/(main)/marketplace" delay={200} />
-        <QuickAction icon={<Ionicons name="arrow-down-circle-outline" size={24} color={Colors.dark.primary} />} label={t('withdrawals')} route="/(main)/withdrawals" delay={300} />
+        <QuickAction icon={<MaterialCommunityIcons name="factory" size={22} color="#FFFFFF" />} label={t('manufacturing')} route="/(main)/manufacturing" delay={0} themeIndex={0} />
+        <QuickAction icon={<Ionicons name="wallet" size={22} color="#FFFFFF" />} label={t('wallet')} route="/(main)/wallet" delay={100} themeIndex={1} />
+        <QuickAction icon={<Ionicons name="storefront" size={22} color="#FFFFFF" />} label={t('marketplace')} route="/(main)/marketplace" delay={200} themeIndex={2} />
+        <QuickAction icon={<Ionicons name="arrow-down-circle" size={22} color="#FFFFFF" />} label={t('withdrawals')} route="/(main)/withdrawals" delay={300} themeIndex={3} />
       </View>
 
       <View style={styles.recentHeader}>
@@ -244,22 +265,29 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   actionCard: {
-    width: '47%' as any,
     backgroundColor: Colors.dark.card,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
-    padding: 16,
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    flexGrow: 1,
-    flexBasis: '45%',
+    gap: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
-  actionIcon: {
+  actionIconWrap: {
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
+    borderRadius: 14,
+  },
+  actionIconGradient: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.dark.primaryDim,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -267,7 +295,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Rajdhani_600SemiBold',
     color: Colors.dark.text,
-    textAlign: 'center',
+    flex: 1,
+  },
+  actionArrow: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.dark.background,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   recentHeader: {
     flexDirection: 'row',
