@@ -89,11 +89,12 @@ export default function MarketplaceScreen() {
     queryKey: ['/api/marketplace/feed'],
   });
 
-  const { data: myDevices } = useQuery<any[]>({
+  const { data: devicesData } = useQuery<any>({
     queryKey: ['/api/manufacturing/devices'],
   });
+  const myDevices = devicesData?.devices || [];
 
-  const unlistedDevices = myDevices?.filter((d: any) => !d.isListed) || [];
+  const unlistedDevices = myDevices.filter((d: any) => !d.isListed);
 
   const listMutation = useMutation({
     mutationFn: async () => {
