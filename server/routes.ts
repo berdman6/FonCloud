@@ -540,7 +540,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: Request, res: Response) => {
       try {
         const { deviceId, price } = req.body;
-        if (!deviceId || !price || price <= 0) {
+        if (!deviceId) {
           return res.status(400).json({ message: "Invalid input" });
         }
 
@@ -555,12 +555,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Device already listed" });
         }
 
+        const listPrice = price || parseFloat(device.value);
         const user = await storage.getUserByUserId(req.session.userId!);
 
         await storage.updateDeviceListing(
           deviceId,
           true,
-          price.toFixed(2),
+          listPrice.toFixed(2),
         );
 
         const listing = await storage.createListing({
@@ -569,7 +570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sellerName: user!.displayName,
           brand: device.brand,
           model: device.model,
-          price: price.toFixed(2),
+          price: listPrice.toFixed(2),
         });
 
         return res.json({
@@ -604,7 +605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireAuth,
     async (req: Request, res: Response) => {
       try {
-        const listingId = parseInt(req.params.id);
+        const listingId = parseInt(req.params.id as string);
         const listing = await storage.getListingById(listingId);
         if (!listing) {
           return res.status(404).json({ message: "Listing not found" });
@@ -639,7 +640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireAuth,
     async (req: Request, res: Response) => {
       try {
-        const listingId = parseInt(req.params.id);
+        const listingId = parseInt(req.params.id as string);
         const listing = await storage.getListingById(listingId);
         if (!listing) {
           return res.status(404).json({ message: "Listing not found" });

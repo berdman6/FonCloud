@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform, RefreshControl, TextInput, Alert, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, interpolate } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolate } from 'react-native-reanimated';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { GlowCard } from '@/components/GlowCard';
-import { NeonButton } from '@/components/NeonButton';
-import { apiRequest, queryClient } from '@/lib/query-client';
+import { apiRequest } from '@/lib/query-client';
 import Colors from '@/constants/colors';
 
 function ListingCard({ listing, userId, onLike }: { listing: any; userId: string; onLike: (id: number) => void }) {
@@ -78,43 +77,12 @@ function ListingCard({ listing, userId, onLike }: { listing: any; userId: string
 
 export default function MarketplaceScreen() {
   const insets = useSafeAreaInsets();
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
   const { t } = useLanguage();
   const [refreshing, setRefreshing] = useState(false);
-  const [showListModal, setShowListModal] = useState(false);
-  const [selectedDevice, setSelectedDevice] = useState<any>(null);
-  const [listPrice, setListPrice] = useState('');
 
   const { data: listings, refetch: refetchListings } = useQuery<any[]>({
     queryKey: ['/api/marketplace/feed'],
-  });
-
-  const { data: devicesData } = useQuery<any>({
-    queryKey: ['/api/manufacturing/devices'],
-  });
-  const myDevices = devicesData?.devices || [];
-
-  const unlistedDevices = myDevices.filter((d: any) => !d.isListed);
-
-  const listMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest('POST', '/api/marketplace/list', {
-        deviceId: selectedDevice.id,
-        price: parseFloat(listPrice),
-      });
-      return res.json();
-    },
-    onSuccess: () => {
-      Alert.alert('Success', t('listedSuccess'));
-      setShowListModal(false);
-      setSelectedDevice(null);
-      setListPrice('');
-      refetchListings();
-      queryClient.invalidateQueries({ queryKey: ['/api/manufacturing/devices'] });
-    },
-    onError: (err: any) => {
-      Alert.alert('Error', err.message || 'Failed to list');
-    },
   });
 
   const likeMutation = useMutation({
@@ -133,14 +101,6 @@ export default function MarketplaceScreen() {
     setRefreshing(false);
   };
 
-  const handleList = () => {
-    if (!selectedDevice || !listPrice.trim()) {
-      Alert.alert('Error', 'Please select device and set price');
-      return;
-    }
-    listMutation.mutate();
-  };
-
   return (
     <View style={styles.container}>
       <ScrollView
@@ -149,12 +109,6 @@ export default function MarketplaceScreen() {
       >
         <View style={styles.headerRow}>
           <Text style={styles.sectionTitle}>{t('feed')}</Text>
-          {unlistedDevices.length > 0 && (
-            <Pressable onPress={() => setShowListModal(true)} style={styles.postBtn}>
-              <Ionicons name="add" size={18} color="#FFFFFF" />
-              <Text style={styles.postBtnText}>{t('listDevice')}</Text>
-            </Pressable>
-          )}
         </View>
 
         {(!listings || listings.length === 0) ? (
@@ -175,48 +129,6 @@ export default function MarketplaceScreen() {
           </View>
         )}
       </ScrollView>
-
-      <Modal visible={showListModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }]}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t('listDevice')}</Text>
-              <Pressable onPress={() => setShowListModal(false)}>
-                <Ionicons name="close" size={24} color={Colors.dark.text} />
-              </Pressable>
-            </View>
-
-            <Text style={styles.modalLabel}>{t('selectBrand')}</Text>
-            <ScrollView style={styles.devicePicker} horizontal={false}>
-              {unlistedDevices.map((device: any) => (
-                <Pressable
-                  key={device.id}
-                  onPress={() => setSelectedDevice(device)}
-                  style={[styles.deviceOption, selectedDevice?.id === device.id && styles.deviceOptionSelected]}
-                >
-                  <Text style={styles.deviceOptionModel}>{device.model}</Text>
-                  <Text style={styles.deviceOptionValue}>{Number(device.value).toFixed(0)} credits</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-
-            <Text style={styles.modalLabel}>{t('setPrice')}</Text>
-            <View style={styles.inputContainer}>
-              <Ionicons name="diamond-outline" size={18} color={Colors.dark.textMuted} style={{ marginRight: 8 }} />
-              <TextInput
-                style={styles.input}
-                placeholder={t('enterAmount')}
-                placeholderTextColor={Colors.dark.textMuted}
-                value={listPrice}
-                onChangeText={setListPrice}
-                keyboardType="decimal-pad"
-              />
-            </View>
-
-            <NeonButton title={t('listNow')} onPress={handleList} loading={listMutation.isPending} disabled={!selectedDevice} />
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -239,20 +151,6 @@ const styles = StyleSheet.create({
     fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
     letterSpacing: 0.5,
-  },
-  postBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: Colors.dark.accent,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  postBtnText: {
-    fontSize: 13,
-    fontFamily: 'HindSiliguri_600SemiBold',
-    color: '#FFFFFF',
   },
   emptyCard: {
     padding: 48,
@@ -365,78 +263,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.primary,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: Colors.dark.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    gap: 14,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
-  },
-  modalLabel: {
-    fontSize: 13,
-    fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textSecondary,
-    marginBottom: 4,
-  },
-  devicePicker: {
-    maxHeight: 180,
-  },
-  deviceOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
-    marginBottom: 8,
-    backgroundColor: Colors.dark.card,
-  },
-  deviceOptionSelected: {
-    borderColor: Colors.dark.primary,
-    backgroundColor: Colors.dark.primaryDim,
-  },
-  deviceOptionModel: {
-    fontSize: 14,
-    fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.text,
-  },
-  deviceOptionValue: {
-    fontSize: 13,
-    fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.primary,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.dark.inputBg,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.dark.inputBorder,
-    paddingHorizontal: 12,
-  },
-  input: {
-    flex: 1,
-    color: Colors.dark.text,
-    fontFamily: 'HindSiliguri_500Medium',
-    fontSize: 14,
-    paddingVertical: 12,
   },
 });

@@ -113,6 +113,8 @@ const translations: { [key in Language]: Translations } = {
     noDevices: 'কোনো ডিভাইস নেই',
     deviceValue: 'ডিভাইসের মূল্য',
     listOnMarket: 'মার্কেটে তালিকাভুক্ত করুন',
+    postToMarketplace: 'মার্কেটে পোস্ট করুন',
+    dismiss: 'বাদ দিন',
 
     // Terminal log messages
     initSystem: 'সিস্টেম ইনিশিয়ালাইজ হচ্ছে... / Initializing system...',
@@ -310,6 +312,8 @@ const translations: { [key in Language]: Translations } = {
     noDevices: 'No Devices',
     deviceValue: 'Device Value',
     listOnMarket: 'List On Market',
+    postToMarketplace: 'Post to Marketplace',
+    dismiss: 'Dismiss',
 
     // Terminal log messages
     initSystem: 'সিস্টেম ইনিশিয়ালাইজ হচ্ছে... / Initializing system...',

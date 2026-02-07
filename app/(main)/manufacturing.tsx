@@ -84,6 +84,7 @@ export default function ManufacturingScreen() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [terminalLines, setTerminalLines] = useState<TerminalLine[]>([]);
+  const [completedDevice, setCompletedDevice] = useState<any>(null);
   const terminalRef = useRef<ScrollView>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const msgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -108,6 +109,7 @@ export default function ManufacturingScreen() {
       queryClient.invalidateQueries({ queryKey: ['/api/wallet/transactions'] });
       if (data?.device) {
         scheduleDeviceSoldNotifications(data.device.model, data.device.brand);
+        setCompletedDevice(data.device);
       }
     },
     onError: (err: any) => {
@@ -115,6 +117,22 @@ export default function ManufacturingScreen() {
       if (err?.message?.includes('limit')) {
         Alert.alert(t('error'), t('dailyLimitReached'));
       }
+    },
+  });
+
+  const postMutation = useMutation({
+    mutationFn: async (deviceId: number) => {
+      const res = await apiRequest('POST', '/api/marketplace/list', { deviceId });
+      return res.json();
+    },
+    onSuccess: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setCompletedDevice(null);
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ['/api/marketplace/feed'] });
+    },
+    onError: (err: any) => {
+      Alert.alert(t('error'), err.message || 'Failed to post');
     },
   });
 
@@ -241,6 +259,30 @@ export default function ManufacturingScreen() {
           icon={<MaterialCommunityIcons name="factory" size={20} color={(!selectedBrand || todayCount >= dailyLimit) ? Colors.dark.textMuted : '#FFFFFF'} />}
           style={{ marginVertical: 16 }}
         />
+      )}
+
+      {completedDevice && !isGenerating && (
+        <GlowCard style={styles.successCard} glowColor={Colors.dark.success}>
+          <View style={styles.successIconWrap}>
+            <Ionicons name="checkmark-circle" size={56} color={Colors.dark.success} />
+          </View>
+          <Text style={styles.successTitle}>{t('deviceComplete')}</Text>
+          <Text style={styles.successModel}>{completedDevice.brand} {completedDevice.model}</Text>
+          <Text style={styles.successValue}>{Number(completedDevice.value).toFixed(0)} {t('credits')}</Text>
+          <View style={styles.successActions}>
+            <Pressable
+              onPress={() => postMutation.mutate(completedDevice.id)}
+              style={[styles.postMarketBtn, postMutation.isPending && { opacity: 0.6 }]}
+              disabled={postMutation.isPending}
+            >
+              <Ionicons name="share-social" size={18} color="#FFFFFF" />
+              <Text style={styles.postMarketBtnText}>{t('postToMarketplace')}</Text>
+            </Pressable>
+            <Pressable onPress={() => setCompletedDevice(null)} style={styles.dismissBtn}>
+              <Text style={styles.dismissBtnText}>{t('dismiss')}</Text>
+            </Pressable>
+          </View>
+        </GlowCard>
       )}
 
       {terminalLines.length > 0 && (
@@ -505,6 +547,59 @@ const styles = StyleSheet.create({
   deviceValueLabel: {
     fontSize: 10,
     fontFamily: 'HindSiliguri_400Regular',
+    color: Colors.dark.textMuted,
+  },
+  successCard: {
+    padding: 24,
+    alignItems: 'center',
+    marginVertical: 16,
+    gap: 8,
+  },
+  successIconWrap: {
+    marginBottom: 4,
+  },
+  successTitle: {
+    fontSize: 18,
+    fontFamily: 'HindSiliguri_700Bold',
+    color: Colors.dark.success,
+  },
+  successModel: {
+    fontSize: 16,
+    fontFamily: 'HindSiliguri_600SemiBold',
+    color: Colors.dark.text,
+  },
+  successValue: {
+    fontSize: 22,
+    fontFamily: 'HindSiliguri_700Bold',
+    color: Colors.dark.primary,
+    marginBottom: 8,
+  },
+  successActions: {
+    width: '100%',
+    gap: 10,
+    marginTop: 8,
+  },
+  postMarketBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: Colors.dark.primary,
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  postMarketBtnText: {
+    fontSize: 15,
+    fontFamily: 'HindSiliguri_600SemiBold',
+    color: '#FFFFFF',
+  },
+  dismissBtn: {
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  dismissBtnText: {
+    fontSize: 13,
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.textMuted,
   },
 });
