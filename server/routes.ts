@@ -155,6 +155,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!referrer) {
           return res.status(400).json({ message: "Invalid referral code" });
         }
+        const referrerBalance = parseFloat(referrer.walletBalance || "0");
+        if (referrerBalance < SIGNUP_FEE) {
+          return res.status(400).json({ message: "Referrer does not have enough balance to cover signup fee" });
+        }
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -168,7 +172,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         referredBy: referralCode === "FONCLOUD" ? null : referrer!.userId,
       });
 
-      await storage.updateUserBalance(newUser.userId, -SIGNUP_FEE);
+      if (referrer) {
+        await storage.updateUserBalance(referrer.userId, -SIGNUP_FEE);
+        await storage.createTransaction({
+          fromUserId: referrer.userId,
+          toUserId: newUser.userId,
+          amount: SIGNUP_FEE.toFixed(2),
+          type: "signup_fee",
+          description: `Signup fee for ${displayName}`,
+        });
+      }
 
       if (referrer) {
         await storage.incrementReferralCount(referrer.userId);
@@ -374,7 +387,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
   );
 
+  // ===== DASHBOARD ROUTES =====
+
+  app.get(
+    "/api/dashboard/stats",
+    requireAuth,
+    async (req: Request, res: Response) => {
+      try {
+        const userId = req.session.userId!;
+        const txs = await storage.getTransactionsByUserId(userId);
+        const comms = await storage.getCommissionsByUserId(userId);
+
+        const now = new Date();
+        const last7Days: { date: string; manufacturing: number; commission: number; total: number }[] = [];
+
+        for (let i = 6; i >= 0; i--) {
+          const day = new Date(now);
+          day.setDate(day.getDate() - i);
+          const dayStr = day.toISOString().split('T')[0];
+          const dayStart = new Date(dayStr + 'T00:00:00.000Z');
+          const dayEnd = new Date(dayStr + 'T23:59:59.999Z');
+
+          let mfgIncome = 0;
+          let commIncome = 0;
+
+          txs.forEach((tx: any) => {
+            const txDate = new Date(tx.createdAt);
+            if (txDate >= dayStart && txDate <= dayEnd) {
+              if (tx.type === 'manufacturing' && tx.toUserId === userId) {
+                mfgIncome += parseFloat(tx.amount || '0');
+              }
+            }
+          });
+
+          comms.forEach((c: any) => {
+            const cDate = new Date(c.createdAt);
+            if (cDate >= dayStart && cDate <= dayEnd) {
+              commIncome += parseFloat(c.amount || '0');
+            }
+          });
+
+          last7Days.push({
+            date: dayStr,
+            manufacturing: Math.round(mfgIncome * 100) / 100,
+            commission: Math.round(commIncome * 100) / 100,
+            total: Math.round((mfgIncome + commIncome) * 100) / 100,
+          });
+        }
+
+        const totalMfg = txs
+          .filter((tx: any) => tx.type === 'manufacturing' && tx.toUserId === userId)
+          .reduce((sum: number, tx: any) => sum + parseFloat(tx.amount || '0'), 0);
+
+        const totalComm = comms.reduce((sum: number, c: any) => sum + parseFloat(c.amount || '0'), 0);
+
+        return res.json({
+          last7Days,
+          totals: {
+            manufacturing: Math.round(totalMfg * 100) / 100,
+            commission: Math.round(totalComm * 100) / 100,
+            total: Math.round((totalMfg + totalComm) * 100) / 100,
+          },
+        });
+      } catch (error: any) {
+        console.error("Dashboard error:", error);
+        return res.status(500).json({ message: "Failed to load dashboard" });
+      }
+    },
+  );
+
   // ===== MANUFACTURING ROUTES =====
+
+  const DAILY_MANUFACTURING_LIMIT = 10;
 
   app.post(
     "/api/manufacturing/generate",
@@ -388,6 +472,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const user = await storage.getUserByUserId(req.session.userId!);
         if (!user) return res.status(404).json({ message: "User not found" });
+
+        const todayCount = await storage.getDevicesTodayCount(user.userId);
+        if (todayCount >= DAILY_MANUFACTURING_LIMIT) {
+          return res.status(400).json({ message: "Daily manufacturing limit reached (10/day)", dailyLimitReached: true });
+        }
 
         const model = randomModel(brand);
         const specs = randomSpecs();
@@ -430,13 +519,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireAuth,
     async (req: Request, res: Response) => {
       const devs = await storage.getDevicesByUserId(req.session.userId!);
-      return res.json(
-        devs.map((d) => ({
+      const todayCount = await storage.getDevicesTodayCount(req.session.userId!);
+      return res.json({
+        devices: devs.map((d) => ({
           ...d,
           value: toNum(d.value),
           listPrice: toNum(d.listPrice),
         })),
-      );
+        todayCount,
+        dailyLimit: DAILY_MANUFACTURING_LIMIT,
+      });
     },
   );
 

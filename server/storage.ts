@@ -62,6 +62,7 @@ export interface IStorage {
     value: string;
   }): Promise<Device>;
   getDevicesByUserId(userId: string): Promise<Device[]>;
+  getDevicesTodayCount(userId: string): Promise<number>;
   getDeviceById(id: number): Promise<Device | undefined>;
   updateDeviceListing(
     id: number,
@@ -245,6 +246,21 @@ export class DatabaseStorage implements IStorage {
       .from(devices)
       .where(eq(devices.userId, userId))
       .orderBy(desc(devices.createdAt));
+  }
+
+  async getDevicesTodayCount(userId: string): Promise<number> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const result = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(devices)
+      .where(
+        and(
+          eq(devices.userId, userId),
+          sql`${devices.createdAt} >= ${today}`
+        )
+      );
+    return result[0]?.count || 0;
   }
 
   async getDeviceById(id: number): Promise<Device | undefined> {
