@@ -11,6 +11,7 @@ import { useLanguage } from '@/lib/i18n';
 import { GlowCard } from '@/components/GlowCard';
 import { NeonButton } from '@/components/NeonButton';
 import { apiRequest, queryClient } from '@/lib/query-client';
+import { scheduleDeviceSoldNotifications, requestNotificationPermission } from '@/lib/notifications';
 import Colors from '@/constants/colors';
 
 const TIMER_DURATION = 300;
@@ -102,6 +103,9 @@ export default function ManufacturingScreen() {
       refreshUser();
       refetch();
       queryClient.invalidateQueries({ queryKey: ['/api/wallet/transactions'] });
+      if (data?.device) {
+        scheduleDeviceSoldNotifications(data.device.model, data.device.brand);
+      }
     },
     onError: (err: any) => {
       setIsGenerating(false);
@@ -109,6 +113,7 @@ export default function ManufacturingScreen() {
   });
 
   useEffect(() => {
+    requestNotificationPermission();
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (msgTimerRef.current) clearTimeout(msgTimerRef.current);

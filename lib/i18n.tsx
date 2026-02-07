@@ -185,6 +185,10 @@ const translations: { [key in Language]: Translations } = {
     linkCopied: 'লিংক কপি হয়েছে',
     joinMessage: 'আমার রেফারেল কোড ব্যবহার করে FonCloud এ যোগ দিন',
 
+    // Notifications
+    deviceSoldOut: 'আপনার ডিভাইস বিক্রি হয়ে গেছে!',
+    notificationTitle: 'FonCloud',
+
     // Common
     loading: 'লোড হচ্ছে',
     error: 'ত্রুটি',
@@ -370,6 +374,10 @@ const translations: { [key in Language]: Translations } = {
     copyLink: 'Copy Link',
     linkCopied: 'Link Copied',
     joinMessage: 'Join FonCloud using my referral code',
+
+    // Notifications
+    deviceSoldOut: 'Your device sold out!',
+    notificationTitle: 'FonCloud',
 
     // Common
     loading: 'Loading',
