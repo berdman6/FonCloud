@@ -31,6 +31,8 @@ export interface IStorage {
   getUserByUserId(userId: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByReferralCode(referralCode: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByPhone(phone: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserBalance(userId: string, amount: number): Promise<void>;
   incrementReferralCount(userId: string): Promise<void>;
@@ -126,6 +128,22 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(eq(users.referralCode, referralCode));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.phone, phone));
     return user;
   }
 

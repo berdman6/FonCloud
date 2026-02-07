@@ -122,11 +122,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
       }
 
-      const { username, password, displayName, referralCode } = parsed.data;
+      const { username, password, displayName, referralCode, email, phone } = parsed.data;
 
       const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already taken" });
+      }
+
+      if (email && email.trim()) {
+        const existingEmail = await storage.getUserByEmail(email.trim());
+        if (existingEmail) {
+          return res.status(400).json({ message: "Email already registered" });
+        }
+      }
+
+      if (phone && phone.trim()) {
+        const existingPhone = await storage.getUserByPhone(phone.trim());
+        if (existingPhone) {
+          return res.status(400).json({ message: "Phone number already registered" });
+        }
       }
 
       let referrer = null;
@@ -149,6 +163,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         username,
         password: hashedPassword,
         displayName,
+        email: email && email.trim() ? email.trim() : null,
+        phone: phone && phone.trim() ? phone.trim() : null,
         referredBy: referralCode === "FONCLOUD" ? null : referrer!.userId,
       });
 
@@ -216,7 +232,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { username, password } = parsed.data;
-      const user = await storage.getUserByUsername(username);
+      let user = await storage.getUserByUsername(username);
+      if (!user && username.includes('@')) {
+        user = await storage.getUserByEmail(username);
+      }
+      if (!user && /^\+?\d{7,}$/.test(username)) {
+        user = await storage.getUserByPhone(username);
+      }
       if (!user) {
         return res.status(401).json({ message: "Invalid credentials" });
       }

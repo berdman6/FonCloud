@@ -16,6 +16,8 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id", { length: 10 }).notNull().unique(),
   username: text("username").notNull().unique(),
+  email: text("email"),
+  phone: varchar("phone", { length: 20 }),
   password: text("password").notNull(),
   displayName: text("display_name").notNull(),
   referralCode: varchar("referral_code", { length: 10 }).notNull().unique(),
@@ -99,6 +101,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   displayName: true,
   referredBy: true,
+  email: true,
+  phone: true,
 });
 
 export const loginSchema = z.object({
@@ -111,6 +115,8 @@ export const registerSchema = z.object({
   password: z.string().min(6),
   displayName: z.string().min(2),
   referralCode: z.string().min(4),
+  email: z.string().email().optional().or(z.literal('')),
+  phone: z.string().optional().or(z.literal('')),
 });
 
 export const transferSchema = z.object({
