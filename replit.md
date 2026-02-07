@@ -18,9 +18,12 @@ Preferred communication style: Simple, everyday language.
   - `app/(main)/` - Authenticated screens: home, wallet, manufacturing, marketplace, withdrawals, profile, referrals
 - **Main Layout**: Custom animated drawer navigation in `app/(main)/_layout.tsx` (not using a tab bar or standard drawer library)
 - **State Management**: TanStack React Query for server state, React Context for auth (`lib/auth-context.tsx`) and i18n (`lib/i18n.tsx`)
-- **Styling**: StyleSheet-based with a centralized color theme in `constants/colors.ts` (dark mode only, neon green accent `#00FF88`)
-- **Fonts**: Hind Siliguri font family (Google Fonts via `@expo-google-fonts/hind-siliguri`)
-- **Animations**: react-native-reanimated throughout for entrance animations, drawer, and manufacturing timer
+- **Styling**: StyleSheet-based with a centralized color theme in `constants/colors.ts` (light theme, olive green `#5B8C3E`, orange accent `#F5A623`)
+- **Fonts**: Hind Siliguri font family (Google Fonts via `@expo-google-fonts/hind-siliguri`) - classic Bengali/English readability
+- **Animations**: react-native-reanimated throughout for entrance animations, drawer, manufacturing timer, and FloatingBackground component
+- **FloatingBackground**: Subtle animated floating dots on home screen (`components/FloatingBackground.tsx`) - olive green particles with very low opacity
+- **Notifications**: `expo-notifications` for local push notifications when devices are manufactured (sold out alerts at 5/19/31 min)
+- **Sharing**: `expo-clipboard` for copy-to-clipboard, native `Share` API for referral link sharing
 - **i18n**: Custom implementation supporting Bengali (`bn`) and English (`en`), stored in AsyncStorage
 
 ### Backend (Express.js)
@@ -75,4 +78,6 @@ Preferred communication style: Simple, everyday language.
   - `react-native-gesture-handler` - Touch gestures
   - `react-native-keyboard-controller` - Keyboard handling
   - `expo-haptics` - Haptic feedback on native
+  - `expo-notifications` - Local push notifications
+  - `expo-clipboard` - Clipboard access for sharing
   - `patch-package` - Post-install patching (runs on `postinstall`)
