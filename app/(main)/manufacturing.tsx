@@ -216,7 +216,7 @@ export default function ManufacturingScreen() {
           title={t('startManufacturing')}
           onPress={startGeneration}
           disabled={!selectedBrand}
-          icon={<MaterialCommunityIcons name="factory" size={20} color={!selectedBrand ? Colors.dark.textMuted : '#050505'} />}
+          icon={<MaterialCommunityIcons name="factory" size={20} color={!selectedBrand ? Colors.dark.textMuted : '#FFFFFF'} />}
           style={{ marginVertical: 16 }}
         />
       )}
@@ -342,6 +342,7 @@ const styles = StyleSheet.create({
   terminalCard: {
     marginBottom: 20,
     overflow: 'hidden',
+    backgroundColor: '#1E1E1E',
   },
   terminalHeader: {
     flexDirection: 'row',
@@ -350,7 +351,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.divider,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   terminalDot: {
     width: 8,
@@ -361,7 +362,7 @@ const styles = StyleSheet.create({
   terminalTitle: {
     fontSize: 11,
     fontFamily: 'Rajdhani_600SemiBold',
-    color: Colors.dark.textMuted,
+    color: 'rgba(255,255,255,0.5)',
     marginLeft: 8,
     letterSpacing: 2,
   },
@@ -372,13 +373,13 @@ const styles = StyleSheet.create({
   terminalLine: {
     fontSize: 12,
     fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
-    color: Colors.dark.textSecondary,
+    color: 'rgba(255,255,255,0.7)',
     lineHeight: 20,
   },
   terminalCursor: {
     fontSize: 14,
     fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
-    color: Colors.dark.primary,
+    color: '#5B8C3E',
     marginTop: 4,
   },
   devicesHeader: {

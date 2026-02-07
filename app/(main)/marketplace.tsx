@@ -150,7 +150,7 @@ export default function MarketplaceScreen() {
           <Text style={styles.sectionTitle}>{t('feed')}</Text>
           {unlistedDevices.length > 0 && (
             <Pressable onPress={() => setShowListModal(true)} style={styles.postBtn}>
-              <Ionicons name="add" size={18} color={Colors.dark.background} />
+              <Ionicons name="add" size={18} color="#FFFFFF" />
               <Text style={styles.postBtnText}>{t('listDevice')}</Text>
             </Pressable>
           )}
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: Colors.dark.primary,
+    backgroundColor: Colors.dark.accent,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   postBtnText: {
     fontSize: 13,
     fontFamily: 'Rajdhani_600SemiBold',
-    color: Colors.dark.background,
+    color: '#FFFFFF',
   },
   emptyCard: {
     padding: 48,
