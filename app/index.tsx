@@ -22,7 +22,7 @@ export default function IndexScreen() {
     <View style={styles.container}>
       <PortalAnimation size={180} />
       <Text style={styles.title}>FonCloud</Text>
-      <ActivityIndicator color={Colors.dark.primary} size="small" style={{ marginTop: 24 }} />
+      <ActivityIndicator color="#FFFFFF" size="small" style={{ marginTop: 24 }} />
     </View>
   );
 }
@@ -30,14 +30,14 @@ export default function IndexScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
+    backgroundColor: Colors.dark.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   title: {
     fontSize: 32,
     fontFamily: 'Rajdhani_700Bold',
-    color: Colors.dark.primary,
+    color: '#FFFFFF',
     marginTop: 24,
     letterSpacing: 3,
   },

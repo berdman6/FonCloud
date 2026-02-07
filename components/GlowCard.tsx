@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
 
 interface GlowCardProps {
@@ -15,12 +14,6 @@ export function GlowCard({ children, style, glowColor, noBorder }: GlowCardProps
 
   return (
     <View style={[styles.container, !noBorder && { borderColor, borderWidth: 1 }, style]}>
-      <LinearGradient
-        colors={['rgba(0, 255, 136, 0.03)', 'rgba(0, 0, 0, 0)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
       {children}
     </View>
   );
@@ -30,6 +23,10 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.dark.card,
     borderRadius: 16,
-    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
 });

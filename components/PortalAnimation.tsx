@@ -97,8 +97,8 @@ export function PortalAnimation({ size = 200 }: { size?: number }) {
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
           <Defs>
             <RadialGradient id="portalGrad" cx="50%" cy="50%" r="50%">
-              <Stop offset="0%" stopColor={Colors.dark.primary} stopOpacity="0.4" />
-              <Stop offset="70%" stopColor={Colors.dark.primary} stopOpacity="0.1" />
+              <Stop offset="0%" stopColor={Colors.dark.primary} stopOpacity="0.2" />
+              <Stop offset="70%" stopColor={Colors.dark.primary} stopOpacity="0.05" />
               <Stop offset="100%" stopColor="transparent" stopOpacity="0" />
             </RadialGradient>
           </Defs>
@@ -130,14 +130,14 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: 'absolute',
-    backgroundColor: Colors.dark.primaryGlow,
+    backgroundColor: 'rgba(91, 140, 62, 0.1)',
   },
   orb: {
-    backgroundColor: Colors.dark.primary,
+    backgroundColor: 'rgba(91, 140, 62, 0.5)',
     shadowColor: Colors.dark.primary,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 2,
   },
 });

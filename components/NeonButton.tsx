@@ -21,9 +21,9 @@ export function NeonButton({ title, onPress, variant = 'primary', loading, disab
 
   const variantStyles = {
     primary: {
-      bg: Colors.dark.primary,
-      text: '#050505',
-      border: Colors.dark.primary,
+      bg: Colors.dark.accent,
+      text: '#FFFFFF',
+      border: Colors.dark.accent,
     },
     secondary: {
       bg: 'transparent',
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 25,
     gap: 8,
   },
   text: {
