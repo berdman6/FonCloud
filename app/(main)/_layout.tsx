@@ -94,7 +94,7 @@ export default function MainLayout() {
             </Pressable>
           ),
           contentStyle: { backgroundColor: Colors.dark.background },
-          headerShadowVisible: false,
+          headerShadowVisible: true,
         }}
       >
         <Stack.Screen name="home" options={{ title: 'FonCloud' }} />
@@ -120,7 +120,7 @@ export default function MainLayout() {
               <Text style={styles.profileName}>{user?.displayName || 'User'}</Text>
               <Text style={styles.profileId}>ID: {user?.userId || '---'}</Text>
               <View style={styles.balanceRow}>
-                <Ionicons name="diamond-outline" size={14} color={Colors.dark.primary} />
+                <Ionicons name="diamond-outline" size={14} color="#FFFFFF" />
                 <Text style={styles.balanceText}>{t('totalCredits')}: {Number(user?.walletBalance || 0).toFixed(2)}</Text>
               </View>
             </View>
@@ -189,39 +189,44 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: 280,
     backgroundColor: Colors.dark.surface,
-    borderRightWidth: 1,
-    borderRightColor: Colors.dark.cardBorder,
+    borderRightWidth: 0,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    shadowOffset: { width: 2, height: 0 },
+    elevation: 8,
   },
   drawerProfile: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 20,
     alignItems: 'center',
+    backgroundColor: Colors.dark.primary,
   },
   avatar: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: Colors.dark.primaryDim,
+    backgroundColor: 'rgba(255,255,255,0.25)',
     borderWidth: 2,
-    borderColor: Colors.dark.primary,
+    borderColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
     fontSize: 24,
     fontFamily: 'Rajdhani_700Bold',
-    color: Colors.dark.primary,
+    color: '#FFFFFF',
   },
   profileName: {
     fontSize: 18,
     fontFamily: 'Rajdhani_600SemiBold',
-    color: Colors.dark.text,
+    color: '#FFFFFF',
     marginTop: 10,
   },
   profileId: {
     fontSize: 12,
     fontFamily: 'Rajdhani_400Regular',
-    color: Colors.dark.textMuted,
+    color: 'rgba(255,255,255,0.7)',
     marginTop: 2,
   },
   balanceRow: {
@@ -229,7 +234,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     marginTop: 8,
-    backgroundColor: Colors.dark.primaryDim,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
@@ -237,7 +242,7 @@ const styles = StyleSheet.create({
   balanceText: {
     fontSize: 13,
     fontFamily: 'Rajdhani_500Medium',
-    color: Colors.dark.primary,
+    color: '#FFFFFF',
   },
   drawerDivider: {
     height: 1,
