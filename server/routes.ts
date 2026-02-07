@@ -85,7 +85,7 @@ function randomSpecs(): string {
 }
 
 function randomValue(): number {
-  return Math.floor(Math.random() * 1901) + 100;
+  return 50;
 }
 
 function toNum(val: string | null | undefined): number {

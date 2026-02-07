@@ -14,7 +14,7 @@ import { apiRequest, queryClient } from '@/lib/query-client';
 import { scheduleDeviceSoldNotifications, requestNotificationPermission } from '@/lib/notifications';
 import Colors from '@/constants/colors';
 
-const TIMER_DURATION = 300;
+const TIMER_DURATION = 120;
 const CIRCLE_SIZE = 180;
 const STROKE_WIDTH = 6;
 const RADIUS = (CIRCLE_SIZE - STROKE_WIDTH) / 2;
