@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: '#FFFFFF',
     marginTop: 24,
     letterSpacing: 3,

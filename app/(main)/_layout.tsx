@@ -87,7 +87,7 @@ export default function MainLayout() {
           headerShown: true,
           headerStyle: { backgroundColor: Colors.dark.background },
           headerTintColor: Colors.dark.text,
-          headerTitleStyle: { fontFamily: 'Rajdhani_600SemiBold', fontSize: 18 },
+          headerTitleStyle: { fontFamily: 'HindSiliguri_600SemiBold', fontSize: 18 },
           headerLeft: () => (
             <Pressable onPress={openDrawer} style={styles.menuBtn}>
               <Ionicons name="menu" size={26} color={Colors.dark.primary} />
@@ -214,18 +214,18 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: 24,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: '#FFFFFF',
   },
   profileName: {
     fontSize: 18,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: '#FFFFFF',
     marginTop: 10,
   },
   profileId: {
     fontSize: 12,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: 'rgba(255,255,255,0.7)',
     marginTop: 2,
   },
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   },
   balanceText: {
     fontSize: 13,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: '#FFFFFF',
   },
   drawerDivider: {
@@ -267,13 +267,13 @@ const styles = StyleSheet.create({
   },
   drawerItemText: {
     fontSize: 15,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.textSecondary,
     flex: 1,
   },
   drawerItemTextActive: {
     color: Colors.dark.primary,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
   },
   activeIndicator: {
     width: 4,
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   },
   drawerBottomText: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.textSecondary,
     flex: 1,
   },
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   },
   langBadgeText: {
     fontSize: 11,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.primary,
   },
 });

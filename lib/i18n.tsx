@@ -180,6 +180,10 @@ const translations: { [key in Language]: Translations } = {
     totalCommissions: 'মোট কমিশন',
     directReferrals: 'সরাসরি রেফারেল',
     networkSize: 'নেটওয়ার্ক সাইজ',
+    shareLink: 'লিংক শেয়ার করুন',
+    copyLink: 'লিংক কপি করুন',
+    linkCopied: 'লিংক কপি হয়েছে',
+    joinMessage: 'আমার রেফারেল কোড ব্যবহার করে FonCloud এ যোগ দিন',
 
     // Common
     loading: 'লোড হচ্ছে',
@@ -362,6 +366,10 @@ const translations: { [key in Language]: Translations } = {
     totalCommissions: 'Total Commissions',
     directReferrals: 'Direct Referrals',
     networkSize: 'Network Size',
+    shareLink: 'Share Link',
+    copyLink: 'Copy Link',
+    linkCopied: 'Link Copied',
+    joinMessage: 'Join FonCloud using my referral code',
 
     // Common
     loading: 'Loading',

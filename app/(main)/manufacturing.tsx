@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
     marginTop: 8,
     marginBottom: 12,
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   },
   brandLabel: {
     fontSize: 12,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.textSecondary,
     textAlign: 'center',
   },
@@ -329,12 +329,12 @@ const styles = StyleSheet.create({
   },
   timerText: {
     fontSize: 36,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
   },
   timerLabel: {
     fontSize: 12,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 2,
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
   },
   terminalTitle: {
     fontSize: 11,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: 'rgba(255,255,255,0.5)',
     marginLeft: 8,
     letterSpacing: 2,
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   },
   deviceCount: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.primary,
     backgroundColor: Colors.dark.primaryDim,
     paddingHorizontal: 10,
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   devicesList: {
@@ -430,12 +430,12 @@ const styles = StyleSheet.create({
   },
   deviceModel: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
   },
   deviceBrand: {
     fontSize: 12,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   deviceValueWrap: {
@@ -443,12 +443,12 @@ const styles = StyleSheet.create({
   },
   deviceValue: {
     fontSize: 18,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
   },
   deviceValueLabel: {
     fontSize: 10,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
 });

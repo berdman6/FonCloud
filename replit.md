@@ -19,7 +19,7 @@ Preferred communication style: Simple, everyday language.
 - **Main Layout**: Custom animated drawer navigation in `app/(main)/_layout.tsx` (not using a tab bar or standard drawer library)
 - **State Management**: TanStack React Query for server state, React Context for auth (`lib/auth-context.tsx`) and i18n (`lib/i18n.tsx`)
 - **Styling**: StyleSheet-based with a centralized color theme in `constants/colors.ts` (dark mode only, neon green accent `#00FF88`)
-- **Fonts**: Rajdhani font family (Google Fonts via `@expo-google-fonts/rajdhani`)
+- **Fonts**: Hind Siliguri font family (Google Fonts via `@expo-google-fonts/hind-siliguri`)
 - **Animations**: react-native-reanimated throughout for entrance animations, drawer, and manufacturing timer
 - **i18n**: Custom implementation supporting Bengali (`bn`) and English (`en`), stored in AsyncStorage
 

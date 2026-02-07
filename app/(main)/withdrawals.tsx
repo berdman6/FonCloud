@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   },
   formTitle: {
     fontSize: 16,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
   },
   balanceRow: {
@@ -216,17 +216,17 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: 13,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textSecondary,
   },
   balanceValue: {
     fontSize: 15,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
   },
   fieldLabel: {
     fontSize: 13,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.textSecondary,
   },
   methodRow: {
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
   methodLabel: {
     fontSize: 12,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.textSecondary,
   },
   inputContainer: {
@@ -266,13 +266,13 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: Colors.dark.text,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     fontSize: 14,
     paddingVertical: 12,
   },
   sectionTitle: {
     fontSize: 16,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
     marginBottom: 12,
     letterSpacing: 0.5,
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   historyList: {
@@ -310,17 +310,17 @@ const styles = StyleSheet.create({
   },
   historyAmount: {
     fontSize: 15,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
   },
   historyMethod: {
     fontSize: 12,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   historyDate: {
     fontSize: 11,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   statusBadge: {
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     textTransform: 'uppercase' as const,
     letterSpacing: 1,
   },

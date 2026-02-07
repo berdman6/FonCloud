@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, Pressable, Alert, Share } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import * as Clipboard from 'expo-clipboard';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { GlowCard } from '@/components/GlowCard';
@@ -14,9 +15,19 @@ export default function ProfileScreen() {
   const { user } = useAuth();
   const { t } = useLanguage();
 
-  const copyToClipboard = (text: string) => {
+  const referralLink = `https://foncloud.app/register?ref=${user?.referralCode || ''}`;
+  const shareMessage = `${t('joinMessage')}: ${user?.referralCode || ''}\n${referralLink}`;
+
+  const copyToClipboard = async (text: string) => {
+    await Clipboard.setStringAsync(text);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert(t('codeCopied'), text);
+  };
+
+  const handleShareLink = async () => {
+    try {
+      await Share.share({ message: shareMessage });
+    } catch (e) {}
   };
 
   const memberSince = user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '---';
@@ -88,6 +99,12 @@ export default function ProfileScreen() {
           >
             <Ionicons name="copy-outline" size={18} color={Colors.dark.primary} />
           </Pressable>
+          <Pressable
+            onPress={handleShareLink}
+            style={({ pressed }) => [styles.copyBtn, pressed && { opacity: 0.7 }]}
+          >
+            <Ionicons name="share-social-outline" size={18} color={Colors.dark.accent} />
+          </Pressable>
         </View>
         <Text style={styles.shareHint}>{t('shareCode')}</Text>
       </GlowCard>
@@ -140,18 +157,18 @@ const styles = StyleSheet.create({
   },
   avatarLetter: {
     fontSize: 22,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
   },
   displayName: {
     fontSize: 24,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.text,
     marginTop: 8,
   },
   username: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   infoCard: {
@@ -177,12 +194,12 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 11,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   infoValue: {
     fontSize: 15,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
   },
   infoDivider: {
@@ -203,12 +220,12 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 18,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.text,
   },
   statLabel: {
     fontSize: 10,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
     textAlign: 'center',
   },
@@ -225,7 +242,7 @@ const styles = StyleSheet.create({
   },
   referralTitle: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.textSecondary,
   },
   codeBox: {
@@ -241,7 +258,7 @@ const styles = StyleSheet.create({
   },
   codeText: {
     fontSize: 28,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
     letterSpacing: 4,
   },
@@ -250,7 +267,7 @@ const styles = StyleSheet.create({
   },
   shareHint: {
     fontSize: 12,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   commissionCard: {
@@ -260,7 +277,7 @@ const styles = StyleSheet.create({
   },
   commissionTitle: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
     letterSpacing: 0.5,
   },
@@ -279,12 +296,12 @@ const styles = StyleSheet.create({
   },
   levelLabel: {
     fontSize: 12,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.textMuted,
   },
   levelRate: {
     fontSize: 20,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
   },
 });

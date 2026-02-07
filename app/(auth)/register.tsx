@@ -185,19 +185,19 @@ const styles = StyleSheet.create({
   },
   brandName: {
     fontSize: 28,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
     letterSpacing: 3,
   },
   title: {
     fontSize: 22,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
     marginTop: 8,
   },
   subtitle: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textSecondary,
     marginTop: 4,
   },
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: Colors.dark.text,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     fontSize: 15,
     paddingVertical: 14,
   },
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   },
   feeText: {
     color: Colors.dark.warning,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     fontSize: 13,
     flex: 1,
   },
@@ -251,12 +251,12 @@ const styles = StyleSheet.create({
   },
   footerText: {
     color: Colors.dark.textSecondary,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     fontSize: 14,
   },
   footerLink: {
     color: Colors.dark.primary,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     fontSize: 14,
   },
 });

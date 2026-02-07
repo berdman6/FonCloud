@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
   langText: {
     color: Colors.dark.primary,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     fontSize: 13,
   },
   logoSection: {
@@ -132,14 +132,14 @@ const styles = StyleSheet.create({
   },
   brandName: {
     fontSize: 36,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
     marginTop: 16,
     letterSpacing: 4,
   },
   subtitle: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textSecondary,
     marginTop: 4,
   },
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: Colors.dark.text,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     fontSize: 15,
     paddingVertical: 14,
   },
@@ -176,12 +176,12 @@ const styles = StyleSheet.create({
   },
   footerText: {
     color: Colors.dark.textSecondary,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     fontSize: 14,
   },
   footerLink: {
     color: Colors.dark.primary,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     fontSize: 14,
   },
 });

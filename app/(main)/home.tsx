@@ -10,6 +10,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { GlowCard } from '@/components/GlowCard';
 import { PortalAnimation } from '@/components/PortalAnimation';
+import { FloatingBackground } from '@/components/FloatingBackground';
 import Colors from '@/constants/colors';
 
 const ACTION_THEMES = [
@@ -86,20 +87,22 @@ export default function HomeScreen() {
   }));
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.dark.primary} />}
-    >
-      <View style={styles.welcomeSection}>
-        <View style={styles.portalWrap}>
-          <PortalAnimation size={120} />
+    <View style={{ flex: 1, backgroundColor: Colors.dark.background }}>
+      <FloatingBackground />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.dark.primary} />}
+      >
+        <View style={styles.welcomeSection}>
+          <View style={styles.portalWrap}>
+            <PortalAnimation size={120} />
+          </View>
+          <Text style={styles.welcomeText}>{t('welcomeBack')}</Text>
+          <Text style={styles.userName}>{user?.displayName || 'User'}</Text>
         </View>
-        <Text style={styles.welcomeText}>{t('welcomeBack')}</Text>
-        <Text style={styles.userName}>{user?.displayName || 'User'}</Text>
-      </View>
 
-      <Animated.View style={glowStyle}>
+        <Animated.View style={glowStyle}>
         <GlowCard style={styles.balanceCard}>
           <View style={styles.balanceContent}>
             <Text style={styles.balanceLabel}>{t('totalBalance')}</Text>
@@ -168,14 +171,15 @@ export default function HomeScreen() {
           ))}
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
+    backgroundColor: 'transparent',
     paddingHorizontal: 16,
   },
   welcomeSection: {
@@ -188,12 +192,12 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textSecondary,
   },
   userName: {
     fontSize: 24,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.text,
   },
   balanceCard: {
@@ -206,20 +210,20 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: 13,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 2,
   },
   balanceAmount: {
     fontSize: 42,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
     marginTop: 4,
   },
   creditLabel: {
     fontSize: 12,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.textMuted,
     letterSpacing: 1,
   },
@@ -238,12 +242,12 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 16,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.text,
   },
   statLabel: {
     fontSize: 11,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   statDivider: {
@@ -253,7 +257,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
     marginBottom: 12,
     letterSpacing: 0.5,
@@ -293,7 +297,7 @@ const styles = StyleSheet.create({
   },
   actionLabel: {
     fontSize: 13,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
     flex: 1,
   },
@@ -317,7 +321,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   txList: {
@@ -343,16 +347,16 @@ const styles = StyleSheet.create({
   },
   txType: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.text,
   },
   txDate: {
     fontSize: 11,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   txAmount: {
     fontSize: 16,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
   },
 });

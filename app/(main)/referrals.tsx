@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, RefreshControl, Share, Pressable, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
+import * as Haptics from 'expo-haptics';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
@@ -31,6 +33,21 @@ export default function ReferralsScreen() {
   };
 
   const totalComm = commissions?.reduce((sum: number, c: any) => sum + Number(c.amount), 0) || 0;
+
+  const referralLink = `https://foncloud.app/register?ref=${user?.referralCode || ''}`;
+  const shareMessage = `${t('joinMessage')}: ${user?.referralCode || ''}\n${referralLink}`;
+
+  const handleCopyLink = async () => {
+    await Clipboard.setStringAsync(referralLink);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Alert.alert(t('linkCopied'), referralLink);
+  };
+
+  const handleShareLink = async () => {
+    try {
+      await Share.share({ message: shareMessage });
+    } catch (e) {}
+  };
 
   return (
     <ScrollView
@@ -63,6 +80,17 @@ export default function ReferralsScreen() {
         <Text style={styles.codeValue}>{user?.referralCode || '---'}</Text>
         <Text style={styles.codeHint}>{t('shareCode')}</Text>
       </GlowCard>
+
+      <View style={styles.shareRow}>
+        <Pressable onPress={handleCopyLink} style={({ pressed }) => [styles.shareBtn, pressed && { opacity: 0.8 }]}>
+          <Ionicons name="copy-outline" size={18} color="#FFFFFF" />
+          <Text style={styles.shareBtnText}>{t('copyLink')}</Text>
+        </Pressable>
+        <Pressable onPress={handleShareLink} style={({ pressed }) => [styles.shareBtn, styles.shareBtnAccent, pressed && { opacity: 0.8 }]}>
+          <Ionicons name="share-social-outline" size={18} color="#FFFFFF" />
+          <Text style={styles.shareBtnText}>{t('shareLink')}</Text>
+        </Pressable>
+      </View>
 
       <Text style={styles.sectionTitle}>{t('yourNetwork')}</Text>
       {(!network || network.length === 0) ? (
@@ -145,12 +173,12 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 24,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.text,
   },
   statLabel: {
     fontSize: 11,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
     textAlign: 'center',
   },
@@ -167,23 +195,46 @@ const styles = StyleSheet.create({
   },
   codeLabel: {
     fontSize: 13,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.textSecondary,
   },
   codeValue: {
     fontSize: 32,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
     letterSpacing: 4,
   },
   codeHint: {
     fontSize: 12,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
+  },
+  shareRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  shareBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: Colors.dark.primary,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  shareBtnAccent: {
+    backgroundColor: Colors.dark.accent,
+  },
+  shareBtnText: {
+    fontSize: 13,
+    fontFamily: 'HindSiliguri_600SemiBold',
+    color: '#FFFFFF',
   },
   sectionTitle: {
     fontSize: 16,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
     marginBottom: 12,
     letterSpacing: 0.5,
@@ -196,7 +247,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   networkList: {
@@ -223,7 +274,7 @@ const styles = StyleSheet.create({
   },
   refAvatarText: {
     fontSize: 16,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
   },
   refInfo: {
@@ -231,17 +282,17 @@ const styles = StyleSheet.create({
   },
   refName: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
   },
   refId: {
     fontSize: 11,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   refDate: {
     fontSize: 11,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   commList: {
@@ -264,7 +315,7 @@ const styles = StyleSheet.create({
   },
   levelText: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
   },
   commInfo: {
@@ -272,17 +323,17 @@ const styles = StyleSheet.create({
   },
   commFrom: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.text,
   },
   commDate: {
     fontSize: 11,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   commAmount: {
     fontSize: 16,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.success,
   },
 });

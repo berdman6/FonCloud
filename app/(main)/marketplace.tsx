@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
     letterSpacing: 0.5,
   },
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   },
   postBtnText: {
     fontSize: 13,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: '#FFFFFF',
   },
   emptyCard: {
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   listingsGrid: {
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   },
   sellerAvatarText: {
     fontSize: 16,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
   },
   sellerInfo: {
@@ -295,12 +295,12 @@ const styles = StyleSheet.create({
   },
   sellerName: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
   },
   postedTime: {
     fontSize: 11,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   priceBadge: {
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
   },
   priceText: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_700Bold',
+    fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.primary,
   },
   deviceDisplay: {
@@ -339,12 +339,12 @@ const styles = StyleSheet.create({
   },
   deviceModelName: {
     fontSize: 16,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
   },
   deviceBrandName: {
     fontSize: 12,
-    fontFamily: 'Rajdhani_400Regular',
+    fontFamily: 'HindSiliguri_400Regular',
     color: Colors.dark.textMuted,
   },
   listingActions: {
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   },
   actionCount: {
     fontSize: 13,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.primary,
   },
   modalOverlay: {
@@ -385,12 +385,12 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.text,
   },
   modalLabel: {
     fontSize: 13,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.textSecondary,
     marginBottom: 4,
   },
@@ -414,12 +414,12 @@ const styles = StyleSheet.create({
   },
   deviceOptionModel: {
     fontSize: 14,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.text,
   },
   deviceOptionValue: {
     fontSize: 13,
-    fontFamily: 'Rajdhani_600SemiBold',
+    fontFamily: 'HindSiliguri_600SemiBold',
     color: Colors.dark.primary,
   },
   inputContainer: {
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: Colors.dark.text,
-    fontFamily: 'Rajdhani_500Medium',
+    fontFamily: 'HindSiliguri_500Medium',
     fontSize: 14,
     paddingVertical: 12,
   },
