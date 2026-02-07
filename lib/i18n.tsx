@@ -92,6 +92,11 @@ const translations: { [key in Language]: Translations } = {
     deviceSale: 'ডিভাইস বিক্রয়',
     devicePurchase: 'ডিভাইস ক্রয়',
 
+    // Dashboard
+    earningsDashboard: 'আয়ের ড্যাশবোর্ড',
+    last7Days: 'গত ৭ দিন',
+    totalIncome: 'মোট আয়',
+
     // Manufacturing
     labTitle: 'ম্যানুফ্যাকচারিং ল্যাব',
     generateDevice: 'ডিভাইস তৈরি করুন',
@@ -283,6 +288,11 @@ const translations: { [key in Language]: Translations } = {
     signupBonus: 'Signup Bonus',
     deviceSale: 'Device Sale',
     devicePurchase: 'Device Purchase',
+
+    // Dashboard
+    earningsDashboard: 'Earnings Dashboard',
+    last7Days: 'Last 7 Days',
+    totalIncome: 'Total Income',
 
     // Manufacturing
     labTitle: 'Manufacturing Lab',
