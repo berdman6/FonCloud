@@ -14,9 +14,11 @@ export default function ReferralsScreen() {
   const { t } = useLanguage();
   const [refreshing, setRefreshing] = useState(false);
 
-  const { data: network, refetch: refetchNetwork } = useQuery<any[]>({
+  const { data: networkData, refetch: refetchNetwork } = useQuery<any>({
     queryKey: ['/api/referrals/network'],
   });
+
+  const network: any[] = networkData?.referrals || [];
 
   const { data: commissions, refetch: refetchComm } = useQuery<any[]>({
     queryKey: ['/api/referrals/commissions'],
