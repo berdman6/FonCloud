@@ -52,18 +52,91 @@ function QuickAction({ icon, label, route, delay, themeIndex }: { icon: React.Re
   );
 }
 
+function BarChart({ data, t }: { data: any[]; t: (k: string) => string }) {
+  const maxVal = Math.max(...data.map(d => d.total), 1);
+
+  return (
+    <GlowCard style={styles.chartCard}>
+      <View style={styles.chartHeader}>
+        <View style={styles.chartTitleRow}>
+          <Ionicons name="bar-chart-outline" size={18} color={Colors.dark.primary} />
+          <Text style={styles.chartTitle}>{t('earningsDashboard')}</Text>
+        </View>
+        <Text style={styles.chartSubtitle}>{t('last7Days')}</Text>
+      </View>
+
+      <View style={styles.chartLegend}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: Colors.dark.primary }]} />
+          <Text style={styles.legendText}>{t('manufacturing')}</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: Colors.dark.accent }]} />
+          <Text style={styles.legendText}>{t('commission')}</Text>
+        </View>
+      </View>
+
+      <View style={styles.chartBody}>
+        {data.map((day, idx) => {
+          const mfgHeight = maxVal > 0 ? (day.manufacturing / maxVal) * 100 : 0;
+          const commHeight = maxVal > 0 ? (day.commission / maxVal) * 100 : 0;
+          const dayLabel = new Date(day.date + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 2);
+
+          return (
+            <View key={idx} style={styles.chartColumn}>
+              <View style={styles.chartBarsWrap}>
+                <View style={[styles.chartBar, { height: `${Math.max(mfgHeight, 2)}%`, backgroundColor: Colors.dark.primary }]} />
+                <View style={[styles.chartBar, { height: `${Math.max(commHeight, 2)}%`, backgroundColor: Colors.dark.accent }]} />
+              </View>
+              <Text style={styles.chartDayLabel}>{dayLabel}</Text>
+            </View>
+          );
+        })}
+      </View>
+
+      <View style={styles.chartTotals}>
+        <View style={styles.chartTotalItem}>
+          <Text style={styles.chartTotalLabel}>{t('manufacturing')}</Text>
+          <Text style={[styles.chartTotalValue, { color: Colors.dark.primary }]}>
+            {data.reduce((s, d) => s + d.manufacturing, 0).toFixed(0)}
+          </Text>
+        </View>
+        <View style={styles.chartTotalDivider} />
+        <View style={styles.chartTotalItem}>
+          <Text style={styles.chartTotalLabel}>{t('commission')}</Text>
+          <Text style={[styles.chartTotalValue, { color: Colors.dark.accent }]}>
+            {data.reduce((s, d) => s + d.commission, 0).toFixed(0)}
+          </Text>
+        </View>
+        <View style={styles.chartTotalDivider} />
+        <View style={styles.chartTotalItem}>
+          <Text style={styles.chartTotalLabel}>{t('totalIncome')}</Text>
+          <Text style={[styles.chartTotalValue, { color: Colors.dark.success }]}>
+            {data.reduce((s, d) => s + d.total, 0).toFixed(0)}
+          </Text>
+        </View>
+      </View>
+    </GlowCard>
+  );
+}
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { user, refreshUser } = useAuth();
   const { t } = useLanguage();
   const [refreshing, setRefreshing] = React.useState(false);
 
-  const { data: devices } = useQuery<any[]>({
+  const { data: devicesData } = useQuery<any>({
     queryKey: ['/api/manufacturing/devices'],
   });
+  const devicesList = devicesData?.devices || [];
 
   const { data: transactions } = useQuery<any[]>({
     queryKey: ['/api/wallet/transactions'],
+  });
+
+  const { data: dashboardData } = useQuery<any>({
+    queryKey: ['/api/dashboard/stats'],
   });
 
   const onRefresh = async () => {
@@ -85,6 +158,8 @@ export default function HomeScreen() {
   const glowStyle = useAnimatedStyle(() => ({
     shadowOpacity: interpolate(pulseAnim.value, [0, 1], [0.2, 0.6]),
   }));
+
+  const chartData = dashboardData?.last7Days || [];
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.dark.background }}>
@@ -124,12 +199,16 @@ export default function HomeScreen() {
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <Ionicons name="phone-portrait" size={16} color={Colors.dark.secondary} />
-              <Text style={styles.statValue}>{devices?.length || 0}</Text>
+              <Text style={styles.statValue}>{devicesList.length || 0}</Text>
               <Text style={styles.statLabel}>{t('yourDevices')}</Text>
             </View>
           </View>
         </GlowCard>
       </Animated.View>
+
+      {chartData.length > 0 && (
+        <BarChart data={chartData} t={t} />
+      )}
 
       <Text style={styles.sectionTitle}>{t('quickActions')}</Text>
       <View style={styles.actionsGrid}>
@@ -253,6 +332,107 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 30,
+    backgroundColor: Colors.dark.divider,
+  },
+  chartCard: {
+    padding: 16,
+    marginBottom: 24,
+  },
+  chartHeader: {
+    marginBottom: 12,
+  },
+  chartTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  chartTitle: {
+    fontSize: 15,
+    fontFamily: 'HindSiliguri_600SemiBold',
+    color: Colors.dark.text,
+  },
+  chartSubtitle: {
+    fontSize: 11,
+    fontFamily: 'HindSiliguri_400Regular',
+    color: Colors.dark.textMuted,
+    marginTop: 2,
+  },
+  chartLegend: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 12,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  legendText: {
+    fontSize: 11,
+    fontFamily: 'HindSiliguri_400Regular',
+    color: Colors.dark.textMuted,
+  },
+  chartBody: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    height: 120,
+    gap: 4,
+    marginBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.dark.divider,
+    paddingBottom: 4,
+  },
+  chartColumn: {
+    flex: 1,
+    alignItems: 'center',
+    height: '100%',
+  },
+  chartBarsWrap: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 2,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  chartBar: {
+    width: 12,
+    borderRadius: 3,
+    minHeight: 2,
+  },
+  chartDayLabel: {
+    fontSize: 10,
+    fontFamily: 'HindSiliguri_500Medium',
+    color: Colors.dark.textMuted,
+    marginTop: 4,
+  },
+  chartTotals: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingTop: 8,
+  },
+  chartTotalItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  chartTotalLabel: {
+    fontSize: 10,
+    fontFamily: 'HindSiliguri_400Regular',
+    color: Colors.dark.textMuted,
+  },
+  chartTotalValue: {
+    fontSize: 16,
+    fontFamily: 'HindSiliguri_700Bold',
+  },
+  chartTotalDivider: {
+    width: 1,
+    height: 24,
     backgroundColor: Colors.dark.divider,
   },
   sectionTitle: {
