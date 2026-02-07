@@ -44,9 +44,21 @@ export default function ReferralsScreen() {
   };
 
   const handleShareLink = async () => {
-    try {
-      await Share.share({ message: shareMessage });
-    } catch (e) {}
+    if (Platform.OS === 'web') {
+      try {
+        if (navigator.share) {
+          await navigator.share({ text: shareMessage });
+        } else {
+          await Clipboard.setStringAsync(referralLink);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          Alert.alert(t('linkCopied'), referralLink);
+        }
+      } catch (e) {}
+    } else {
+      try {
+        await Share.share({ message: shareMessage });
+      } catch (e) {}
+    }
   };
 
   return (
