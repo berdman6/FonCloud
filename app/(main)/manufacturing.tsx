@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, FlatList, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -90,9 +90,12 @@ export default function ManufacturingScreen() {
 
   const pulseAnim = useSharedValue(0);
 
-  const { data: devices, refetch } = useQuery<any[]>({
+  const { data: devicesData, refetch } = useQuery<any>({
     queryKey: ['/api/manufacturing/devices'],
   });
+  const devices = devicesData?.devices || [];
+  const todayCount = devicesData?.todayCount || 0;
+  const dailyLimit = devicesData?.dailyLimit || 10;
 
   const generateMutation = useMutation({
     mutationFn: async (brand: string) => {
@@ -109,6 +112,9 @@ export default function ManufacturingScreen() {
     },
     onError: (err: any) => {
       setIsGenerating(false);
+      if (err?.message?.includes('limit')) {
+        Alert.alert(t('error'), t('dailyLimitReached'));
+      }
     },
   });
 
@@ -201,6 +207,17 @@ export default function ManufacturingScreen() {
         ))}
       </View>
 
+      <GlowCard style={styles.dailyLimitCard}>
+        <View style={styles.dailyLimitRow}>
+          <Ionicons name="today-outline" size={18} color={Colors.dark.primary} />
+          <Text style={styles.dailyLimitText}>{t('dailyManufacturing')}</Text>
+        </View>
+        <View style={styles.dailyProgressBar}>
+          <View style={[styles.dailyProgressFill, { width: `${(todayCount / dailyLimit) * 100}%` }]} />
+        </View>
+        <Text style={styles.dailyLimitCount}>{todayCount}/{dailyLimit}</Text>
+      </GlowCard>
+
       {isGenerating ? (
         <Animated.View style={glowStyle}>
           <GlowCard style={styles.timerCard} glowColor={Colors.dark.primary}>
@@ -218,10 +235,10 @@ export default function ManufacturingScreen() {
         </Animated.View>
       ) : (
         <NeonButton
-          title={t('startManufacturing')}
+          title={todayCount >= dailyLimit ? t('dailyLimitReached') : t('startManufacturing')}
           onPress={startGeneration}
-          disabled={!selectedBrand}
-          icon={<MaterialCommunityIcons name="factory" size={20} color={!selectedBrand ? Colors.dark.textMuted : '#FFFFFF'} />}
+          disabled={!selectedBrand || todayCount >= dailyLimit}
+          icon={<MaterialCommunityIcons name="factory" size={20} color={(!selectedBrand || todayCount >= dailyLimit) ? Colors.dark.textMuted : '#FFFFFF'} />}
           style={{ marginVertical: 16 }}
         />
       )}
@@ -316,6 +333,40 @@ const styles = StyleSheet.create({
     fontFamily: 'HindSiliguri_500Medium',
     color: Colors.dark.textSecondary,
     textAlign: 'center',
+  },
+  dailyLimitCard: {
+    padding: 14,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  dailyLimitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  dailyLimitText: {
+    fontSize: 13,
+    fontFamily: 'HindSiliguri_500Medium',
+    color: Colors.dark.textSecondary,
+  },
+  dailyProgressBar: {
+    width: '100%',
+    height: 8,
+    backgroundColor: Colors.dark.cardBorder,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  dailyProgressFill: {
+    height: '100%',
+    backgroundColor: Colors.dark.primary,
+    borderRadius: 4,
+  },
+  dailyLimitCount: {
+    fontSize: 14,
+    fontFamily: 'HindSiliguri_700Bold',
+    color: Colors.dark.primary,
   },
   timerCard: {
     padding: 24,
