@@ -197,6 +197,11 @@ const translations: { [key in Language]: Translations } = {
     // Notifications
     deviceSoldOut: 'আপনার ডিভাইস বিক্রি হয়ে গেছে!',
     notificationTitle: 'FonCloud',
+    notifications: 'বিজ্ঞপ্তি',
+    newNotifications: 'নতুন বিজ্ঞপ্তি',
+    noNotifications: 'কোনো বিজ্ঞপ্তি নেই',
+    deviceSoldNotif: 'ডিভাইস বিক্রি হয়েছে',
+    boughtYourDevice: 'আপনার ডিভাইস কিনেছে',
 
     // Common
     loading: 'লোড হচ্ছে',
@@ -396,6 +401,11 @@ const translations: { [key in Language]: Translations } = {
     // Notifications
     deviceSoldOut: 'Your device sold out!',
     notificationTitle: 'FonCloud',
+    notifications: 'Notifications',
+    newNotifications: 'new notifications',
+    noNotifications: 'No notifications yet',
+    deviceSoldNotif: 'Device Sold',
+    boughtYourDevice: 'bought your device',
 
     // Common
     loading: 'Loading',

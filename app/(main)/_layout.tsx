@@ -6,6 +6,7 @@ import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolate, Easing } from 'react-native-reanimated';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
+import { useNotifications } from '@/lib/notifications-context';
 import Colors from '@/constants/colors';
 
 interface DrawerItemProps {
@@ -38,6 +39,7 @@ export default function MainLayout() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { t, currentLanguage, toggleLanguage } = useLanguage();
+  const { unreadCount } = useNotifications();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerAnim = useSharedValue(0);
 
@@ -91,6 +93,16 @@ export default function MainLayout() {
           headerLeft: () => (
             <Pressable onPress={openDrawer} style={styles.menuBtn}>
               <Ionicons name="menu" size={26} color={Colors.dark.primary} />
+            </Pressable>
+          ),
+          headerRight: () => (
+            <Pressable onPress={() => navigateTo('/(main)/home')} style={styles.bellBtn}>
+              <Ionicons name="notifications-outline" size={22} color={Colors.dark.primary} />
+              {unreadCount > 0 && (
+                <View style={styles.bellBadge}>
+                  <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+                </View>
+              )}
             </Pressable>
           ),
           contentStyle: { backgroundColor: Colors.dark.background },
@@ -181,6 +193,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 4,
+  },
+  bellBtn: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 4,
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 2,
+    backgroundColor: Colors.dark.danger,
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  bellBadgeText: {
+    fontSize: 10,
+    fontFamily: 'HindSiliguri_700Bold',
+    color: '#FFFFFF',
   },
   drawer: {
     position: 'absolute',

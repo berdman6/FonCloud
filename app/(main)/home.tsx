@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform, RefreshControl } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, RefreshControl, Modal, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, withRepeat, withSequence, Easing, interpolate } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, withRepeat, withSequence, Easing, interpolate, runOnJS } from 'react-native-reanimated';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
+import { useNotifications, AppNotification } from '@/lib/notifications-context';
 import { GlowCard } from '@/components/GlowCard';
 import { PortalAnimation } from '@/components/PortalAnimation';
 import { FloatingBackground } from '@/components/FloatingBackground';
@@ -120,11 +121,93 @@ function BarChart({ data, t }: { data: any[]; t: (k: string) => string }) {
   );
 }
 
+function NotificationToast({ notification, onDismiss, onPress }: { notification: AppNotification; onDismiss: () => void; onPress: () => void }) {
+  const translateY = useSharedValue(-100);
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    translateY.value = withTiming(0, { duration: 400, easing: Easing.out(Easing.back(1.2)) });
+    opacity.value = withTiming(1, { duration: 300 });
+
+    const timer = setTimeout(() => {
+      translateY.value = withTiming(-100, { duration: 300 });
+      opacity.value = withTiming(0, { duration: 300 }, () => {
+        runOnJS(onDismiss)();
+      });
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [notification.id]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View style={[styles.toastContainer, animStyle]}>
+      <Pressable onPress={onPress} style={styles.toastContent}>
+        <View style={styles.toastIconWrap}>
+          <Ionicons name="cart" size={20} color="#FFFFFF" />
+        </View>
+        <View style={styles.toastBody}>
+          <Text style={styles.toastTitle} numberOfLines={1}>
+            {notification.countryFlag} {notification.buyerName}
+          </Text>
+          <Text style={styles.toastMessage} numberOfLines={1}>
+            {notification.deviceModel} - {notification.price} credits
+          </Text>
+        </View>
+        <Pressable onPress={onDismiss} hitSlop={8}>
+          <Ionicons name="close" size={18} color="rgba(255,255,255,0.6)" />
+        </Pressable>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+function NotificationItem({ item, onPress }: { item: AppNotification; onPress: (id: string) => void }) {
+  const timeAgo = () => {
+    const diff = Date.now() - new Date(item.createdAt).getTime();
+    const secs = Math.floor(diff / 1000);
+    if (secs < 60) return `${secs}s`;
+    const mins = Math.floor(secs / 60);
+    if (mins < 60) return `${mins}m`;
+    const hrs = Math.floor(mins / 60);
+    return `${hrs}h`;
+  };
+
+  return (
+    <Pressable
+      onPress={() => onPress(item.id)}
+      style={[styles.notifItem, !item.isRead && styles.notifItemUnread]}
+    >
+      <View style={[styles.notifIconWrap, !item.isRead && { backgroundColor: Colors.dark.primaryDim }]}>
+        <Ionicons name="cart" size={18} color={Colors.dark.primary} />
+      </View>
+      <View style={styles.notifContent}>
+        <View style={styles.notifRow}>
+          <Text style={styles.notifFlag}>{item.countryFlag}</Text>
+          <Text style={[styles.notifBuyer, !item.isRead && { color: Colors.dark.text }]} numberOfLines={1}>{item.buyerName}</Text>
+          <Text style={styles.notifTime}>{timeAgo()}</Text>
+        </View>
+        <Text style={styles.notifDevice} numberOfLines={1}>
+          {item.brand} {item.deviceModel}
+        </Text>
+        <Text style={styles.notifPrice}>{item.price} credits</Text>
+      </View>
+      {!item.isRead && <View style={styles.notifDot} />}
+    </Pressable>
+  );
+}
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { user, refreshUser } = useAuth();
   const { t } = useLanguage();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, latestUnread, dismissLatest } = useNotifications();
   const [refreshing, setRefreshing] = React.useState(false);
+  const [showNotifModal, setShowNotifModal] = useState(false);
 
   const { data: devicesData } = useQuery<any>({
     queryKey: ['/api/manufacturing/devices'],
@@ -161,9 +244,27 @@ export default function HomeScreen() {
 
   const chartData = dashboardData?.last7Days || [];
 
+  const handleNotifPress = (id: string) => {
+    markAsRead(id);
+  };
+
+  const handleToastPress = () => {
+    dismissLatest();
+    setShowNotifModal(true);
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: Colors.dark.background }}>
       <FloatingBackground />
+
+      {latestUnread && !showNotifModal && (
+        <NotificationToast
+          notification={latestUnread}
+          onDismiss={dismissLatest}
+          onPress={handleToastPress}
+        />
+      )}
+
       <ScrollView
         style={styles.container}
         contentContainerStyle={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }}
@@ -176,6 +277,18 @@ export default function HomeScreen() {
           <Text style={styles.welcomeText}>{t('welcomeBack')}</Text>
           <Text style={styles.userName}>{user?.displayName || 'User'}</Text>
         </View>
+
+        {unreadCount > 0 && (
+          <Pressable onPress={() => setShowNotifModal(true)} style={styles.notifBanner}>
+            <View style={styles.notifBannerLeft}>
+              <Ionicons name="notifications" size={18} color={Colors.dark.accent} />
+              <Text style={styles.notifBannerText}>
+                {unreadCount} {t('newNotifications')}
+              </Text>
+            </View>
+            <Feather name="chevron-right" size={16} color={Colors.dark.accent} />
+          </Pressable>
+        )}
 
         <Animated.View style={glowStyle}>
         <GlowCard style={styles.balanceCard}>
@@ -251,6 +364,47 @@ export default function HomeScreen() {
         </View>
       )}
       </ScrollView>
+
+      <Modal visible={showNotifModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { paddingTop: insets.top + (Platform.OS === 'web' ? 67 : 10) }]}>
+            <View style={styles.modalHeader}>
+              <View style={styles.modalTitleRow}>
+                <Ionicons name="notifications" size={22} color={Colors.dark.primary} />
+                <Text style={styles.modalTitle}>{t('notifications')}</Text>
+              </View>
+              <View style={styles.modalActions}>
+                {unreadCount > 0 && (
+                  <Pressable onPress={markAllAsRead} style={styles.markAllBtn}>
+                    <Ionicons name="checkmark-done" size={18} color={Colors.dark.primary} />
+                  </Pressable>
+                )}
+                <Pressable onPress={() => setShowNotifModal(false)} hitSlop={8}>
+                  <Ionicons name="close" size={24} color={Colors.dark.text} />
+                </Pressable>
+              </View>
+            </View>
+
+            {notifications.length === 0 ? (
+              <View style={styles.notifEmpty}>
+                <Ionicons name="notifications-off-outline" size={48} color={Colors.dark.textMuted} />
+                <Text style={styles.notifEmptyText}>{t('noNotifications')}</Text>
+              </View>
+            ) : (
+              <FlatList
+                data={notifications}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <NotificationItem item={item} onPress={handleNotifPress} />
+                )}
+                contentContainerStyle={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }}
+                showsVerticalScrollIndicator={false}
+                ItemSeparatorComponent={() => <View style={styles.notifSeparator} />}
+              />
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -278,6 +432,28 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'HindSiliguri_700Bold',
     color: Colors.dark.text,
+  },
+  notifBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(245, 166, 35, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 166, 35, 0.3)',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 16,
+  },
+  notifBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  notifBannerText: {
+    fontSize: 13,
+    fontFamily: 'HindSiliguri_600SemiBold',
+    color: Colors.dark.accent,
   },
   balanceCard: {
     padding: 20,
@@ -538,5 +714,164 @@ const styles = StyleSheet.create({
   txAmount: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_700Bold',
+  },
+  toastContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 12,
+    right: 12,
+    zIndex: 100,
+  },
+  toastContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.dark.primary,
+    borderRadius: 14,
+    padding: 12,
+    gap: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+  toastIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toastBody: {
+    flex: 1,
+  },
+  toastTitle: {
+    fontSize: 13,
+    fontFamily: 'HindSiliguri_600SemiBold',
+    color: '#FFFFFF',
+  },
+  toastMessage: {
+    fontSize: 11,
+    fontFamily: 'HindSiliguri_400Regular',
+    color: 'rgba(255,255,255,0.8)',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    flex: 1,
+    backgroundColor: Colors.dark.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: 40,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.dark.divider,
+  },
+  modalTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: 'HindSiliguri_700Bold',
+    color: Colors.dark.text,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  markAllBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.dark.primaryDim,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  notifEmpty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  notifEmptyText: {
+    fontSize: 14,
+    fontFamily: 'HindSiliguri_400Regular',
+    color: Colors.dark.textMuted,
+  },
+  notifItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  notifItemUnread: {
+    backgroundColor: 'rgba(91, 140, 62, 0.06)',
+  },
+  notifIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.dark.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+  },
+  notifContent: {
+    flex: 1,
+    gap: 2,
+  },
+  notifRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  notifFlag: {
+    fontSize: 16,
+  },
+  notifBuyer: {
+    fontSize: 13,
+    fontFamily: 'HindSiliguri_600SemiBold',
+    color: Colors.dark.textSecondary,
+    flex: 1,
+  },
+  notifTime: {
+    fontSize: 11,
+    fontFamily: 'HindSiliguri_400Regular',
+    color: Colors.dark.textMuted,
+  },
+  notifDevice: {
+    fontSize: 12,
+    fontFamily: 'HindSiliguri_500Medium',
+    color: Colors.dark.textSecondary,
+  },
+  notifPrice: {
+    fontSize: 13,
+    fontFamily: 'HindSiliguri_700Bold',
+    color: Colors.dark.primary,
+  },
+  notifDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.dark.primary,
+  },
+  notifSeparator: {
+    height: 1,
+    backgroundColor: Colors.dark.divider,
+    marginLeft: 72,
   },
 });
