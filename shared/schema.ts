@@ -96,6 +96,16 @@ export const likes = pgTable("likes", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 10 }).notNull(),
+  type: varchar("type", { length: 30 }).notNull(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -137,3 +147,4 @@ export type Commission = typeof commissions.$inferSelect;
 export type Device = typeof devices.$inferSelect;
 export type MarketListing = typeof marketListings.$inferSelect;
 export type Withdrawal = typeof withdrawals.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
