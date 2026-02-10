@@ -168,7 +168,7 @@ function FeedRow({ item, index, t }: { item: any; index: number; t: (k: string) 
 
 const FEED_ROW_HEIGHT = 42;
 const FEED_VISIBLE_ROWS = 6;
-const FEED_SCROLL_INTERVAL = 2500;
+const FEED_SCROLL_INTERVAL = 2000;
 
 function ActivityFeed({ t }: { t: (k: string) => string }) {
   const { data } = useQuery<any>({ queryKey: ['/api/dashboard/activity-feed'] });
@@ -178,7 +178,7 @@ function ActivityFeed({ t }: { t: (k: string) => string }) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const maxHeight = FEED_ROW_HEIGHT * FEED_VISIBLE_ROWS;
-  const items = feed.slice(0, 20);
+  const items = feed.slice(0, 50);
   const totalHeight = items.length * FEED_ROW_HEIGHT;
 
   useEffect(() => {

@@ -625,7 +625,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         feed.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
-        return res.json({ feed: feed.slice(0, 30) });
+        const FAKE_NAMES = [
+          'mo***na','sa***d8','ti***ri','ha***im','ra***ul','ka***ma','sh***ab','na***en',
+          'fa***id','ju***ra','ab***sh','im***an','ta***ik','su***ya','mi***ur','ar***in',
+          'nu***ha','as***ul','ma***ud','ja***ir','ru***na','fi***za','ba***ar','zi***ul',
+          'ka***am','di***ar','ro***na','al***in','hu***in','pa***ez','ne***ma','ta***ba',
+          'af***za','mu***fi','sa***ra','ri***an','za***da','sh***la','na***im','bi***al',
+          'ko***ar','ja***na','fa***ma','re***an','yu***uf','am***na','ha***ra','is***il',
+          'om***ar','lu***fa','qa***ir','wa***id','da***ud','gh***am','ey***an','ch***ry',
+          'bo***la','po***ma','so***ya','to***ir','go***am','mo***ir','fo***ad','lo***fi',
+          'jo***ra','no***an','do***la','vo***ra','ko***fi','ho***na','wo***id','ro***ul',
+          'me***ha','se***na','te***ra','de***ar','ke***ma','be***ir','fe***za','ge***ul',
+          'pe***na','le***an','he***id','we***la','re***fi','ye***ma','ne***ul','ce***ra',
+          'an***ri','in***ar','un***la','en***id','on***ma','ad***na','ud***ir','ed***ul',
+          'za***ri','xa***na','va***id','qa***la','ta***fi','ra***ma','sa***ul','da***na',
+          'ab***ir','ac***na','ag***ul','ah***id','aj***ma','ak***ri','al***na','am***ir',
+          'an***ul','ap***id','ar***ma','as***ri','at***na','av***ir','aw***ul','ay***id',
+          'az***ma','ba***ri','be***na','bi***ir','bu***ul','by***id','ca***ma','ci***ri',
+          'cu***na','cy***ir','da***ul','de***id','di***ma','du***ri','dy***na','ea***ir',
+          'el***ul','em***id','en***ma','er***ri','es***na','ev***ir','ex***ul','ey***id',
+          'fa***ma','fi***ri','fu***na','fy***ir','ga***ul','gi***id','gu***ma','gy***ri',
+          'ha***na','hi***ir','hu***ul','hy***id','ia***ma','il***ri','im***na','in***ir',
+          'ir***ul','is***id','it***ma','iv***ri','iz***na','ja***ir','ji***ul','jo***id',
+          'ju***ma','ka***ri','ki***na','ko***ir','ku***ul','la***id','li***ma','lo***ri',
+          'lu***na','ma***ir','mi***ul','mu***id','my***ma','na***ri','ni***na','no***ir',
+          'nu***ul','ny***id','oa***ma','ol***ri','om***na','on***ir','or***ul','os***id',
+          'ot***ma','ov***ri','oz***na','pa***ir','pi***ul','po***id','pu***ma','py***ri',
+          'qa***na','qi***ir','qu***ul','ra***id','ri***ma','ro***ri','ru***na','ry***ir',
+          'sa***ul','si***id','so***ma','su***ri','sy***na','ta***ir','ti***ul','to***id',
+          'tu***ma','ty***ri','ua***na','ul***ir','um***ul','un***id','ur***ma','us***ri',
+          'ut***na','uz***ir','va***ul','vi***id','vo***ma','vu***ri','wa***na','wi***ir',
+          'wu***ul','xa***id','xi***ma','xu***ri','ya***na','yi***ir','yu***ul','za***id',
+          'zi***ma','zu***ri','ab***ha','ad***ra','af***na','ag***ya','ah***la','ai***ba',
+          'ak***da','al***fa','am***ga','an***ha','ap***ja','aq***ka','ar***la','as***ma',
+          'at***na','au***pa','av***qa','aw***ra','ax***sa','ay***ta','az***ua','ba***va',
+          'bb***wa','bc***xa','bd***ya','be***za','bf***ab','bg***bb','bh***cb','bi***db',
+          'bj***eb','bk***fb','bl***gb','bm***hb','bn***ib','bo***jb','bp***kb','bq***lb',
+        ];
+
+        const FAKE_ACTIONS = [
+          { action: 'deposit', color: '#5B8C3E', isPositive: true },
+          { action: 'withdraw', color: '#E74C3C', isPositive: false },
+          { action: 'transfer', color: '#4A90D9', isPositive: false },
+          { action: 'manufacturing', color: '#F5A623', isPositive: true },
+          { action: 'commission', color: '#9B59B6', isPositive: true },
+          { action: 'deposit', color: '#5B8C3E', isPositive: true },
+          { action: 'withdraw', color: '#E74C3C', isPositive: false },
+          { action: 'manufacturing', color: '#F5A623', isPositive: true },
+          { action: 'sale', color: '#E74C3C', isPositive: true },
+          { action: 'purchase', color: '#3498DB', isPositive: false },
+          { action: 'signup', color: '#2ECC71', isPositive: false },
+          { action: 'commission', color: '#9B59B6', isPositive: true },
+        ];
+
+        const now = Date.now();
+        for (let i = 0; i < 300; i++) {
+          const name = FAKE_NAMES[i % FAKE_NAMES.length];
+          const act = FAKE_ACTIONS[Math.floor(Math.random() * FAKE_ACTIONS.length)];
+          const amt = act.action === 'signup' ? 500
+            : act.action === 'manufacturing' ? 50
+            : +(Math.random() * 800 + 5).toFixed(2);
+
+          feed.push({
+            id: `fake_${i}`,
+            user: name,
+            action: act.action,
+            amount: amt,
+            icon: '',
+            color: act.color,
+            isPositive: act.isPositive,
+            time: new Date(now - Math.floor(Math.random() * 86400000 * 3)),
+          });
+        }
+
+        feed.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+        return res.json({ feed: feed.slice(0, 300) });
       } catch (error: any) {
         console.error("Activity feed error:", error);
         return res.status(500).json({ message: "Failed to load activity feed" });
