@@ -11,8 +11,14 @@ import { queryClient } from "@/lib/query-client";
 import { AuthProvider } from "@/lib/auth-context";
 import { LanguageProvider } from "@/lib/i18n";
 import { NotificationsProvider } from "@/lib/notifications-context";
+import { ThemeProvider, useTheme } from "@/lib/theme-context";
 
 SplashScreen.preventAutoHideAsync();
+
+function ThemedStatusBar() {
+  const { isDark } = useTheme();
+  return <StatusBar style={isDark ? "light" : "dark"} />;
+}
 
 function RootLayoutNav() {
   return (
@@ -47,12 +53,14 @@ export default function RootLayout() {
         <LanguageProvider>
           <AuthProvider>
             <NotificationsProvider>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <KeyboardProvider>
-                  <StatusBar style="light" />
-                  <RootLayoutNav />
-                </KeyboardProvider>
-              </GestureHandlerRootView>
+              <ThemeProvider>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <KeyboardProvider>
+                    <ThemedStatusBar />
+                    <RootLayoutNav />
+                  </KeyboardProvider>
+                </GestureHandlerRootView>
+              </ThemeProvider>
             </NotificationsProvider>
           </AuthProvider>
         </LanguageProvider>

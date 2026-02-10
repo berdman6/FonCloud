@@ -31,6 +31,41 @@ const Colors = {
     neonOrange: "#F5A623",
     black: "#000000",
   },
+  light: {
+    background: "#F5F7F0",
+    surface: "#FFFFFF",
+    card: "#FFFFFF",
+    cardBorder: "rgba(57, 255, 20, 0.2)",
+    text: "#1A1A2E",
+    textSecondary: "rgba(26, 26, 46, 0.6)",
+    textMuted: "rgba(26, 26, 46, 0.4)",
+    primary: "#39FF14",
+    primaryDim: "rgba(57, 255, 20, 0.1)",
+    primaryGlow: "rgba(57, 255, 20, 0.2)",
+    secondary: "#2ECC40",
+    accent: "#F5A623",
+    accentDim: "rgba(245, 166, 35, 0.1)",
+    danger: "#E74C3C",
+    dangerDim: "rgba(231, 76, 60, 0.08)",
+    warning: "#F5A623",
+    warningDim: "rgba(245, 166, 35, 0.1)",
+    success: "#39FF14",
+    successDim: "rgba(57, 255, 20, 0.08)",
+    tabBar: "rgba(255, 255, 255, 0.97)",
+    tabIconDefault: "rgba(26, 26, 46, 0.35)",
+    tabIconSelected: "#2ECC40",
+    inputBg: "rgba(0, 0, 0, 0.04)",
+    inputBorder: "rgba(57, 255, 20, 0.3)",
+    divider: "rgba(0, 0, 0, 0.08)",
+    overlay: "rgba(0, 0, 0, 0.4)",
+    tint: "#39FF14",
+    neonGreen: "#39FF14",
+    neonOrange: "#F5A623",
+    black: "#000000",
+  },
 };
+
+export type ThemeColors = typeof Colors.dark;
+export type ThemeMode = 'dark' | 'light';
 
 export default Colors;

@@ -17,7 +17,7 @@ interface Dot {
   color: string;
 }
 
-const NEON_COLORS = ['#39FF14', '#39FF14', '#39FF14', '#F5A623', '#F5A623', '#2ECC40'];
+const NEON_COLORS = ['#39FF14', '#39FF14', '#F5A623', '#F5A623', '#0A0A0A', '#0A0A0A', '#39FF14', '#F5A623', '#000000'];
 
 const DOTS: Dot[] = Array.from({ length: 20 }, (_, i) => ({
   id: i,

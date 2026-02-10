@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 interface GlowCardProps {
   children: React.ReactNode;
@@ -10,10 +10,16 @@ interface GlowCardProps {
 }
 
 export function GlowCard({ children, style, glowColor, noBorder }: GlowCardProps) {
-  const borderColor = glowColor || Colors.dark.cardBorder;
+  const colors = useThemeColors();
+  const borderColor = glowColor || colors.cardBorder;
 
   return (
-    <View style={[styles.container, !noBorder && { borderColor, borderWidth: 1 }, style]}>
+    <View style={[
+      styles.container,
+      { backgroundColor: colors.card, shadowColor: colors.neonGreen },
+      !noBorder && { borderColor, borderWidth: 1 },
+      style,
+    ]}>
       {children}
     </View>
   );
@@ -21,9 +27,7 @@ export function GlowCard({ children, style, glowColor, noBorder }: GlowCardProps
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.dark.card,
     borderRadius: 16,
-    shadowColor: Colors.dark.neonGreen,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
