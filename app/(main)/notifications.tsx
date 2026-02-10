@@ -165,9 +165,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   notifItemUnread: {
-    backgroundColor: 'rgba(91, 140, 62, 0.06)',
+    backgroundColor: 'rgba(57, 255, 20, 0.06)',
     borderWidth: 1,
-    borderColor: 'rgba(91, 140, 62, 0.12)',
+    borderColor: 'rgba(57, 255, 20, 0.12)',
   },
   notifIconWrap: {
     width: 42,

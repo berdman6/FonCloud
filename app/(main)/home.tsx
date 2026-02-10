@@ -330,8 +330,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.dark.background }}>
-      <FloatingBackground />
+    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
 
       {latestUnread && (
         <NotificationToast
