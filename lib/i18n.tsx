@@ -59,6 +59,9 @@ const translations: { [key in Language]: Translations } = {
     drawerTitle: 'ফনক্লাউড',
     totalCredits: 'মোট ক্রেডিট',
     switchLanguage: 'ভাষা পরিবর্তন করুন',
+    switchTheme: 'থিম পরিবর্তন করুন',
+    darkMode: 'ডার্ক মোড',
+    lightMode: 'লাইট মোড',
 
     // Home
     welcome: 'স্বাগতম',
@@ -291,6 +294,9 @@ const translations: { [key in Language]: Translations } = {
     drawerTitle: 'Foncloud',
     totalCredits: 'Total Credits',
     switchLanguage: 'Switch Language',
+    switchTheme: 'Switch Theme',
+    darkMode: 'Dark Mode',
+    lightMode: 'Light Mode',
 
     // Home
     welcome: 'Welcome',

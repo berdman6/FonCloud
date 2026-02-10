@@ -16,7 +16,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { useNotifications } from '@/lib/notifications-context';
 import { FloatingBackground } from '@/components/FloatingBackground';
-import { useThemeColors } from '@/lib/theme-context';
+import { useThemeColors, useTheme } from '@/lib/theme-context';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -106,6 +106,7 @@ export default function MainLayout() {
   const { user, logout } = useAuth();
   const { t, currentLanguage, toggleLanguage } = useLanguage();
   const { unreadCount } = useNotifications();
+  const { isDark, toggleTheme } = useTheme();
   const [moreOpen, setMoreOpen] = useState(false);
 
   const navigateTo = useCallback((route: string) => {
@@ -251,6 +252,16 @@ export default function MainLayout() {
               right={
                 <View style={[styles.langChip, { backgroundColor: colors.primaryDim }]}>
                   <Text style={[styles.langChipText, { color: colors.primary }]}>{currentLanguage.toUpperCase()}</Text>
+                </View>
+              }
+            />
+            <MoreSheetItem
+              icon={isDark ? 'sunny-outline' : 'moon-outline'}
+              label={t('switchTheme')}
+              onPress={() => { toggleTheme(); setMoreOpen(false); }}
+              right={
+                <View style={[styles.langChip, { backgroundColor: colors.primaryDim }]}>
+                  <Text style={[styles.langChipText, { color: colors.primary }]}>{isDark ? t('darkMode') : t('lightMode')}</Text>
                 </View>
               }
             />
