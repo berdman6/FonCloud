@@ -1,0 +1,124 @@
+{
+  "colorScheme": "light",
+  "fonts": [
+    {
+      "family": "Kufox Sans",
+      "role": "body"
+    }
+  ],
+  "colors": {
+    "primary": "#0000EE",
+    "accent": "#18CA51",
+    "background": "#FFFFFF",
+    "textPrimary": "#777777",
+    "link": "#18CA51"
+  },
+  "typography": {
+    "fontFamilies": {
+      "primary": "Kufox Sans",
+      "heading": "Kufox Sans"
+    },
+    "fontStacks": {
+      "heading": [
+        "Kufox Sans",
+        "PingFang SC",
+        "-apple-system",
+        "BlinkMacSystemFont",
+        "Microsoft YaHei"
+      ],
+      "body": [
+        "Kufox Sans",
+        "-apple-system",
+        "BlinkMacSystemFont",
+        "PingFang SC",
+        "Microsoft YaHei"
+      ],
+      "paragraph": [
+        "Kufox Sans",
+        "PingFang SC",
+        "-apple-system",
+        "BlinkMacSystemFont",
+        "Microsoft YaHei"
+      ]
+    },
+    "fontSizes": {
+      "h1": "56px",
+      "h2": "36px",
+      "body": "20px"
+    }
+  },
+  "spacing": {
+    "baseUnit": 8,
+    "borderRadius": "0px"
+  },
+  "components": {
+    "buttonPrimary": {
+      "background": "#1D1D1D",
+      "textColor": "#FFFFFF",
+      "borderRadius": "24px",
+      "borderRadiusCorners": {
+        "topLeft": "24px",
+        "topRight": "24px",
+        "bottomRight": "24px",
+        "bottomLeft": "24px"
+      },
+      "shadow": "none"
+    }
+  },
+  "images": {
+    "logo": "File saved at: attached_assets/logo.svg",
+    "favicon": "https://www.kucoin.com/logo.png",
+    "ogImage": "File saved at: attached_assets/ogImage.png",
+    "logoHref": "/web3"
+  },
+  "__framework_hints": [],
+  "__llm_logo_reasoning": {
+    "selectedIndex": 0,
+    "reasoning": "Selected #0 because it is visible, medium-sized, and located at the top of the page, matching the favicon and brand name 'KuCoin'.",
+    "confidence": 0.9,
+    "source": "llm"
+  },
+  "__llm_button_reasoning": {
+    "primary": {
+      "index": 1,
+      "text": "Connect Wallet",
+      "reasoning": "The 'Connect Wallet' button is likely the primary CTA due to its action-oriented text, which is crucial for a Web3 wallet platform. It encourages user engagement with the core functionality of the site."
+    },
+    "secondary": {
+      "index": 0,
+      "text": "Download App",
+      "reasoning": "The 'Download App' button serves as a secondary action, supporting the primary function by offering an app download option. However, both buttons share the same color, so technically, there is no valid secondary button with a different color."
+    },
+    "confidence": 0.8
+  },
+  "personality": {
+    "tone": "modern",
+    "energy": "medium",
+    "targetAudience": "crypto enthusiasts and tech-savvy users"
+  },
+  "designSystem": {
+    "framework": "custom",
+    "componentLibrary": ""
+  },
+  "confidence": {
+    "buttons": 0.8,
+    "colors": 0.9,
+    "overall": 0.8500000000000001
+  },
+  "__llm_metadata": {
+    "logoSelection": {
+      "llmCalled": true,
+      "llmSucceeded": true,
+      "finalSource": "llm",
+      "rawLogoSelection": {
+        "selectedLogoIndex": 0,
+        "selectedLogoReasoning": "Selected #0 because it is visible, medium-sized, and located at the top of the page, matching the favicon and brand name 'KuCoin'.",
+        "confidence": 0.9
+      }
+    },
+    "buttonClassification": {
+      "llmCalled": true,
+      "llmSucceeded": true
+    }
+  }
+}
