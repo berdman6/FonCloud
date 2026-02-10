@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
   terminalCursor: {
     fontSize: 14,
     fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
-    color: '#5B8C3E',
+    color: Colors.dark.neonGreen,
     marginTop: 4,
   },
   devicesHeader: {

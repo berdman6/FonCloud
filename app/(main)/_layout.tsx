@@ -15,6 +15,7 @@ import Animated, {
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { useNotifications } from '@/lib/notifications-context';
+import { FloatingBackground } from '@/components/FloatingBackground';
 import Colors from '@/constants/colors';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -124,12 +125,13 @@ export default function MainLayout() {
 
   return (
     <View style={styles.container}>
+      <FloatingBackground />
       <Stack
         screenOptions={{
           headerShown: true,
           headerStyle: { backgroundColor: Colors.dark.background },
-          headerTintColor: Colors.dark.text,
-          headerTitleStyle: { fontFamily: 'HindSiliguri_600SemiBold', fontSize: 18 },
+          headerTintColor: Colors.dark.neonGreen,
+          headerTitleStyle: { fontFamily: 'HindSiliguri_600SemiBold', fontSize: 18, color: Colors.dark.neonGreen },
           headerLeft: () => null,
           headerRight: () => (
             <Pressable onPress={() => navigateTo('/(main)/notifications')} style={styles.bellBtn}>

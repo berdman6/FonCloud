@@ -5,8 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
-import { NeonButton } from '@/components/NeonButton';
-import { PortalAnimation } from '@/components/PortalAnimation';
+import { FloatingBackground } from '@/components/FloatingBackground';
 import Colors from '@/constants/colors';
 
 export default function LoginScreen() {
@@ -17,6 +16,15 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [step, setStep] = useState<'email' | 'password'>('email');
+
+  const handleNext = () => {
+    if (!username.trim()) {
+      Alert.alert('Error', 'Please enter your email or phone number');
+      return;
+    }
+    setStep('password');
+  };
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
@@ -35,56 +43,104 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + (Platform.OS === 'web' ? 67 : 20), paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }]}
-        keyboardShouldPersistTaps="handled"
+    <View style={styles.root}>
+      <FloatingBackground />
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <Pressable onPress={toggleLanguage} style={styles.langToggle}>
-          <Ionicons name="language" size={18} color={Colors.dark.primary} />
-          <Text style={styles.langText}>{currentLanguage === 'bn' ? 'EN' : 'BN'}</Text>
-        </Pressable>
+        <ScrollView
+          contentContainerStyle={[styles.scroll, { paddingTop: insets.top + (Platform.OS === 'web' ? 67 : 40), paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 40) }]}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Pressable onPress={toggleLanguage} style={styles.langToggle}>
+            <Ionicons name="language" size={16} color={Colors.dark.neonGreen} />
+            <Text style={styles.langText}>{currentLanguage === 'bn' ? 'EN' : 'BN'}</Text>
+          </Pressable>
 
-        <View style={styles.logoSection}>
-          <PortalAnimation size={140} />
-          <Text style={styles.brandName}>FonCloud</Text>
-          <Text style={styles.subtitle}>{t('loginSubtitle')}</Text>
-        </View>
+          <Text style={styles.title}>{t('login')}</Text>
 
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Ionicons name="person-outline" size={20} color={Colors.dark.textMuted} style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder={t('usernameEmailPhone')}
-              placeholderTextColor={Colors.dark.textMuted}
-              value={username}
-              onChangeText={setUsername}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="default"
-            />
-          </View>
+          {step === 'email' ? (
+            <View style={styles.card}>
+              <View style={styles.tabRow}>
+                <Pressable style={[styles.tab, styles.tabActive]}>
+                  <Text style={styles.tabTextActive}>{t('usernameEmailPhone')}</Text>
+                  <View style={styles.tabIndicator} />
+                </Pressable>
+              </View>
 
-          <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color={Colors.dark.textMuted} style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder={t('enterPassword')}
-              placeholderTextColor={Colors.dark.textMuted}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-            />
-            <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
-              <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={Colors.dark.textMuted} />
-            </Pressable>
-          </View>
+              <View style={styles.inputWrap}>
+                <TextInput
+                  style={styles.input}
+                  placeholder={t('usernameEmailPhone')}
+                  placeholderTextColor={Colors.dark.textMuted}
+                  value={username}
+                  onChangeText={setUsername}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="default"
+                />
+                {username.length > 0 && (
+                  <Pressable onPress={() => setUsername('')} style={styles.clearBtn}>
+                    <Ionicons name="close-circle" size={20} color={Colors.dark.textMuted} />
+                  </Pressable>
+                )}
+              </View>
 
-          <NeonButton title={t('loginButton')} onPress={handleLogin} loading={loading} />
+              <Pressable
+                onPress={handleNext}
+                style={({ pressed }) => [styles.mainButton, pressed && { opacity: 0.85 }]}
+              >
+                <Text style={styles.mainButtonText}>{t('next') || 'Next'}</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.card}>
+              <View style={styles.tabRow}>
+                <Pressable style={[styles.tab, styles.tabActive]}>
+                  <Text style={styles.tabTextActive}>{t('usernameEmailPhone')}</Text>
+                  <View style={styles.tabIndicator} />
+                </Pressable>
+              </View>
+
+              <View style={styles.inputWrap}>
+                <Text style={styles.inputLabel}>{t('usernameEmailPhone')}</Text>
+                <TextInput
+                  style={styles.input}
+                  value={username}
+                  onChangeText={setUsername}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <Pressable onPress={() => { setUsername(''); setStep('email'); }} style={styles.clearBtn}>
+                  <Ionicons name="close-circle" size={20} color={Colors.dark.textMuted} />
+                </Pressable>
+              </View>
+
+              <View style={styles.inputWrap}>
+                <Text style={styles.inputLabel}>{t('enterPassword')}</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder={t('enterPassword')}
+                  placeholderTextColor={Colors.dark.textMuted}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                />
+                <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.clearBtn}>
+                  <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={Colors.dark.textMuted} />
+                </Pressable>
+              </View>
+
+              <Pressable
+                onPress={handleLogin}
+                disabled={loading}
+                style={({ pressed }) => [styles.mainButton, loading && { opacity: 0.5 }, pressed && { opacity: 0.85 }]}
+              >
+                <Text style={styles.mainButtonText}>{loading ? '...' : t('loginButton')}</Text>
+              </Pressable>
+            </View>
+          )}
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>{t('noAccount')}</Text>
@@ -92,26 +148,26 @@ export default function LoginScreen() {
               <Text style={styles.footerLink}> {t('register')}</Text>
             </Pressable>
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
     backgroundColor: Colors.dark.background,
   },
+  container: {
+    flex: 1,
+  },
   scroll: {
     flexGrow: 1,
-    justifyContent: 'center',
     paddingHorizontal: 24,
   },
   langToggle: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
+    alignSelf: 'flex-end',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -120,59 +176,102 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: Colors.dark.cardBorder,
+    marginBottom: 24,
   },
   langText: {
-    color: Colors.dark.primary,
+    color: Colors.dark.neonGreen,
     fontFamily: 'HindSiliguri_600SemiBold',
     fontSize: 13,
   },
-  logoSection: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  brandName: {
-    fontSize: 36,
+  title: {
+    fontSize: 32,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
-    marginTop: 16,
-    letterSpacing: 4,
+    color: Colors.dark.text,
+    marginBottom: 28,
   },
-  subtitle: {
-    fontSize: 14,
-    fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textSecondary,
+  card: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    gap: 18,
+  },
+  tabRow: {
+    flexDirection: 'row',
+    gap: 20,
+    marginBottom: 4,
+  },
+  tab: {
+    paddingBottom: 8,
+  },
+  tabActive: {},
+  tabTextActive: {
+    fontFamily: 'HindSiliguri_600SemiBold',
+    fontSize: 15,
+    color: Colors.dark.text,
+  },
+  tabIndicator: {
+    height: 2,
+    backgroundColor: Colors.dark.neonGreen,
+    borderRadius: 1,
     marginTop: 4,
   },
-  form: {
-    gap: 16,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.dark.inputBg,
-    borderRadius: 12,
+  inputWrap: {
     borderWidth: 1,
     borderColor: Colors.dark.inputBorder,
-    paddingHorizontal: 14,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    backgroundColor: Colors.dark.inputBg,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  inputIcon: {
-    marginRight: 10,
+  inputLabel: {
+    position: 'absolute',
+    top: -10,
+    left: 12,
+    backgroundColor: Colors.dark.card,
+    paddingHorizontal: 6,
+    fontSize: 12,
+    fontFamily: 'HindSiliguri_500Medium',
+    color: Colors.dark.textSecondary,
   },
   input: {
     flex: 1,
     color: Colors.dark.text,
     fontFamily: 'HindSiliguri_500Medium',
-    fontSize: 15,
+    fontSize: 16,
     paddingVertical: 14,
   },
-  eyeBtn: {
-    padding: 4,
+  clearBtn: {
+    padding: 6,
+  },
+  mainButton: {
+    backgroundColor: Colors.dark.black,
+    borderRadius: 28,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.dark.neonGreen,
+    shadowColor: Colors.dark.neonGreen,
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 8,
+  },
+  mainButtonText: {
+    color: Colors.dark.neonGreen,
+    fontFamily: 'HindSiliguri_700Bold',
+    fontSize: 16,
+    letterSpacing: 0.5,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 24,
   },
   footerText: {
     color: Colors.dark.textSecondary,
@@ -180,7 +279,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   footerLink: {
-    color: Colors.dark.primary,
+    color: Colors.dark.neonOrange,
     fontFamily: 'HindSiliguri_600SemiBold',
     fontSize: 14,
   },

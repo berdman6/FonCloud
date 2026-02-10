@@ -10,24 +10,31 @@ interface Dot {
   x: number;
   y: number;
   opacity: number;
+  driftX: number;
   driftY: number;
   duration: number;
   delay: number;
+  color: string;
 }
 
-const DOTS: Dot[] = Array.from({ length: 10 }, (_, i) => ({
+const NEON_COLORS = ['#39FF14', '#39FF14', '#39FF14', '#F5A623', '#F5A623', '#2ECC40'];
+
+const DOTS: Dot[] = Array.from({ length: 20 }, (_, i) => ({
   id: i,
-  size: 6 + Math.random() * 14,
+  size: 4 + Math.random() * 18,
   x: Math.random() * (SCREEN_WIDTH - 20),
   y: Math.random() * (SCREEN_HEIGHT - 20),
-  opacity: 0.06 + Math.random() * 0.09,
-  driftY: 10 + Math.random() * 20,
-  duration: 3000 + Math.random() * 4000,
-  delay: Math.random() * 2000,
+  opacity: 0.12 + Math.random() * 0.2,
+  driftX: -15 + Math.random() * 30,
+  driftY: 15 + Math.random() * 30,
+  duration: 3000 + Math.random() * 5000,
+  delay: Math.random() * 2500,
+  color: NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)],
 }));
 
 function FloatingDot({ dot }: { dot: Dot }) {
   const translateY = useSharedValue(0);
+  const translateX = useSharedValue(0);
   const opacityVal = useSharedValue(dot.opacity);
 
   useEffect(() => {
@@ -42,12 +49,23 @@ function FloatingDot({ dot }: { dot: Dot }) {
         true
       )
     );
+    translateX.value = withDelay(
+      dot.delay + 500,
+      withRepeat(
+        withSequence(
+          withTiming(dot.driftX, { duration: dot.duration * 1.2, easing: Easing.inOut(Easing.sin) }),
+          withTiming(-dot.driftX, { duration: dot.duration * 1.2, easing: Easing.inOut(Easing.sin) })
+        ),
+        -1,
+        true
+      )
+    );
     opacityVal.value = withDelay(
       dot.delay,
       withRepeat(
         withSequence(
-          withTiming(dot.opacity * 0.5, { duration: dot.duration * 0.8, easing: Easing.inOut(Easing.sin) }),
-          withTiming(dot.opacity, { duration: dot.duration * 0.8, easing: Easing.inOut(Easing.sin) })
+          withTiming(dot.opacity * 0.3, { duration: dot.duration * 0.7, easing: Easing.inOut(Easing.sin) }),
+          withTiming(dot.opacity, { duration: dot.duration * 0.7, easing: Easing.inOut(Easing.sin) })
         ),
         -1,
         true
@@ -56,7 +74,7 @@ function FloatingDot({ dot }: { dot: Dot }) {
   }, []);
 
   const animStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
+    transform: [{ translateY: translateY.value }, { translateX: translateX.value }],
     opacity: opacityVal.value,
   }));
 
@@ -70,7 +88,7 @@ function FloatingDot({ dot }: { dot: Dot }) {
           width: dot.size,
           height: dot.size,
           borderRadius: dot.size / 2,
-          backgroundColor: '#5B8C3E',
+          backgroundColor: dot.color,
         },
         animStyle,
       ]}

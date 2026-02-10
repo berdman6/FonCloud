@@ -16,7 +16,7 @@ import { FloatingBackground } from '@/components/FloatingBackground';
 import Colors from '@/constants/colors';
 
 const ACTION_THEMES = [
-  { gradient: ['#5B8C3E', '#3D6B28'] as const, shadowColor: '#5B8C3E' },
+  { gradient: ['#39FF14', '#1ABB00'] as const, shadowColor: '#39FF14' },
   { gradient: ['#F5A623', '#E08D0D'] as const, shadowColor: '#F5A623' },
   { gradient: ['#4A90D9', '#2C6DB5'] as const, shadowColor: '#4A90D9' },
   { gradient: ['#E25B45', '#C43E2A'] as const, shadowColor: '#E25B45' },

@@ -23,10 +23,10 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.dark.card,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: Colors.dark.neonGreen,
+    shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowRadius: 10,
     elevation: 3,
   },
 });

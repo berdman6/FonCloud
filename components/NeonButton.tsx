@@ -21,14 +21,14 @@ export function NeonButton({ title, onPress, variant = 'primary', loading, disab
 
   const variantStyles = {
     primary: {
-      bg: Colors.dark.accent,
-      text: '#FFFFFF',
-      border: Colors.dark.accent,
+      bg: Colors.dark.black,
+      text: Colors.dark.neonGreen,
+      border: Colors.dark.neonGreen,
     },
     secondary: {
       bg: 'transparent',
-      text: Colors.dark.primary,
-      border: Colors.dark.primary,
+      text: Colors.dark.neonGreen,
+      border: Colors.dark.neonGreen,
     },
     danger: {
       bg: Colors.dark.danger,
@@ -51,12 +51,13 @@ export function NeonButton({ title, onPress, variant = 'primary', loading, disab
       style={({ pressed }) => [
         styles.button,
         {
-          backgroundColor: variant === 'secondary' || variant === 'ghost' ? 'transparent' : v.bg,
+          backgroundColor: v.bg,
           borderColor: v.border,
           opacity: disabled ? 0.4 : pressed ? 0.8 : 1,
           transform: [{ scale: pressed ? 0.97 : 1 }],
         },
         variant === 'secondary' && { borderWidth: 1.5 },
+        variant === 'primary' && { shadowColor: Colors.dark.neonGreen, shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 6 },
         style,
       ]}
     >
@@ -80,6 +81,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 25,
+    borderWidth: 1,
     gap: 8,
   },
   text: {
