@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform, RefreshControl } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, RefreshControl, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, withRepeat, withSequence, Easing, interpolate, runOnJS } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, withRepeat, withSequence, Easing, interpolate, runOnJS, FadeIn } from 'react-native-reanimated';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
@@ -119,6 +119,85 @@ function BarChart({ data, t }: { data: any[]; t: (k: string) => string }) {
         </View>
       </View>
     </GlowCard>
+  );
+}
+
+const ACTION_LABELS: Record<string, string> = {
+  transfer: 'Transfer',
+  deposit: 'Deposit',
+  withdraw: 'Withdraw',
+  manufacturing: 'Manufacturing',
+  commission: 'Commission',
+  sale: 'Sale',
+  purchase: 'Purchase',
+  signup: 'Signup',
+};
+
+const COIN_IMAGES: Record<string, any> = {
+  transfer: require('@/assets/images/coin-dollar.png'),
+  deposit: require('@/assets/images/coin-taka.png'),
+  withdraw: require('@/assets/images/coin-dollar.png'),
+  manufacturing: require('@/assets/images/coin-mobile.png'),
+  commission: require('@/assets/images/coin-taka.png'),
+  sale: require('@/assets/images/coin-mobile.png'),
+  purchase: require('@/assets/images/coin-mobile.png'),
+  signup: require('@/assets/images/coin-taka.png'),
+};
+
+function FeedRow({ item, index, t }: { item: any; index: number; t: (k: string) => string }) {
+  const label = t(item.action) || ACTION_LABELS[item.action] || item.action;
+  const coinImg = COIN_IMAGES[item.action] || COIN_IMAGES.transfer;
+  const isEven = index % 2 === 0;
+
+  return (
+    <Animated.View entering={FadeIn.delay(index * 60).duration(300)}>
+      <View style={[feedStyles.row, isEven && feedStyles.rowAlt]}>
+        <View style={feedStyles.cellAction}>
+          <View style={[feedStyles.actionDot, { backgroundColor: item.color }]} />
+          <Text style={feedStyles.actionText} numberOfLines={1}>{label}</Text>
+        </View>
+        <Text style={feedStyles.cellUser} numberOfLines={1}>{item.user}</Text>
+        <Text style={[feedStyles.cellAmount, { color: item.isPositive ? '#2ECC71' : '#E74C3C' }]}>
+          {item.isPositive ? '+' : '-'}BDT {item.amount.toFixed(2)}
+        </Text>
+        <Image source={coinImg} style={feedStyles.coinIcon} resizeMode="contain" />
+      </View>
+    </Animated.View>
+  );
+}
+
+function ActivityFeed({ t }: { t: (k: string) => string }) {
+  const { data } = useQuery<any>({ queryKey: ['/api/dashboard/activity-feed'] });
+  const feed = data?.feed || [];
+
+  if (feed.length === 0) {
+    return null;
+  }
+
+  return (
+    <View style={feedStyles.container}>
+      <View style={feedStyles.headerRow}>
+        <View style={feedStyles.headerLeft}>
+          <View style={feedStyles.liveIndicator}>
+            <View style={feedStyles.liveDot} />
+          </View>
+          <Text style={feedStyles.headerTitle}>{t('liveFeed')}</Text>
+        </View>
+      </View>
+
+      <View style={feedStyles.tableCard}>
+        <View style={feedStyles.tableHeader}>
+          <Text style={[feedStyles.thText, feedStyles.cellAction]}>{t('action')}</Text>
+          <Text style={[feedStyles.thText, feedStyles.cellUserH]}>{t('user')}</Text>
+          <Text style={[feedStyles.thText, feedStyles.cellAmountH]}>{t('amountLabel')}</Text>
+          <View style={{ width: 24 }} />
+        </View>
+
+        {feed.slice(0, 15).map((item: any, idx: number) => (
+          <FeedRow key={item.id} item={item} index={idx} t={t} />
+        ))}
+      </View>
+    </View>
   );
 }
 
@@ -291,6 +370,8 @@ export default function HomeScreen() {
         <QuickAction icon={<Ionicons name="storefront" size={22} color="#FFFFFF" />} label={t('marketplace')} route="/(main)/marketplace" delay={200} themeIndex={2} />
         <QuickAction icon={<Ionicons name="arrow-down-circle" size={22} color="#FFFFFF" />} label={t('withdrawals')} route="/(main)/withdrawals" delay={300} themeIndex={3} />
       </View>
+
+      <ActivityFeed t={t} />
 
       <View style={styles.recentHeader}>
         <Text style={styles.sectionTitle}>{t('recentActivity')}</Text>
@@ -677,5 +758,119 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
     color: 'rgba(255,255,255,0.8)',
+  },
+});
+
+const feedStyles = StyleSheet.create({
+  container: {
+    marginBottom: 24,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  liveIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'rgba(46, 204, 113, 0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#2ECC71',
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontFamily: 'HindSiliguri_600SemiBold',
+    color: Colors.dark.text,
+    letterSpacing: 0.5,
+  },
+  tableCard: {
+    backgroundColor: '#1A2332',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+  },
+  thText: {
+    fontSize: 12,
+    fontFamily: 'HindSiliguri_600SemiBold',
+    color: 'rgba(255,255,255,0.5)',
+    textTransform: 'uppercase' as const,
+    letterSpacing: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'rgba(255,255,255,0.04)',
+  },
+  rowAlt: {
+    backgroundColor: 'rgba(255,255,255,0.02)',
+  },
+  cellAction: {
+    flex: 2.2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  cellUserH: {
+    flex: 1.5,
+  },
+  cellAmountH: {
+    flex: 2,
+    textAlign: 'right' as const,
+  },
+  actionDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  actionText: {
+    fontSize: 13,
+    fontFamily: 'HindSiliguri_600SemiBold',
+    color: '#FFFFFF',
+    flex: 1,
+  },
+  cellUser: {
+    flex: 1.5,
+    fontSize: 13,
+    fontFamily: 'HindSiliguri_400Regular',
+    color: 'rgba(255,255,255,0.7)',
+  },
+  cellAmount: {
+    flex: 2,
+    fontSize: 13,
+    fontFamily: 'HindSiliguri_700Bold',
+    textAlign: 'right' as const,
+  },
+  coinIcon: {
+    width: 24,
+    height: 24,
+    marginLeft: 6,
   },
 });

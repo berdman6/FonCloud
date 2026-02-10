@@ -10,8 +10,11 @@ import {
   transferSchema,
   withdrawalSchema,
   users,
+  transactions,
+  withdrawals,
 } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
+import { db } from "./db";
 
 declare module "express-session" {
   interface SessionData {
@@ -496,6 +499,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error: any) {
         console.error("Dashboard error:", error);
         return res.status(500).json({ message: "Failed to load dashboard" });
+      }
+    },
+  );
+
+  // ===== ACTIVITY FEED (public dashboard) =====
+
+  app.get(
+    "/api/dashboard/activity-feed",
+    requireAuth,
+    async (req: Request, res: Response) => {
+      try {
+        const allTxs = await db
+          .select({
+            id: transactions.id,
+            fromUserId: transactions.fromUserId,
+            toUserId: transactions.toUserId,
+            amount: transactions.amount,
+            type: transactions.type,
+            description: transactions.description,
+            createdAt: transactions.createdAt,
+          })
+          .from(transactions)
+          .orderBy(desc(transactions.createdAt))
+          .limit(50);
+
+        const allWithdrawals = await db
+          .select({
+            id: withdrawals.id,
+            userId: withdrawals.userId,
+            amount: withdrawals.amount,
+            method: withdrawals.method,
+            status: withdrawals.status,
+            createdAt: withdrawals.createdAt,
+          })
+          .from(withdrawals)
+          .orderBy(desc(withdrawals.createdAt))
+          .limit(20);
+
+        const userIds = new Set<string>();
+        allTxs.forEach(tx => { userIds.add(tx.fromUserId); userIds.add(tx.toUserId); });
+        allWithdrawals.forEach(w => userIds.add(w.userId));
+
+        const userMap: Record<string, string> = {};
+        for (const uid of userIds) {
+          const u = await storage.getUserByUserId(uid);
+          if (u) {
+            const name = u.displayName || u.username;
+            userMap[uid] = name.length > 8 ? name.slice(0, 6) + '...' : name;
+          }
+        }
+
+        const feed: any[] = [];
+
+        allTxs.forEach(tx => {
+          const amt = parseFloat(tx.amount || '0');
+          let action = 'transfer';
+          let icon = 'swap-horizontal';
+          let color = '#4A90D9';
+
+          if (tx.type === 'transfer_sent') {
+            action = 'transfer';
+            icon = 'swap-horizontal';
+            color = '#4A90D9';
+          } else if (tx.type === 'transfer_received') {
+            action = 'deposit';
+            icon = 'arrow-down-circle';
+            color = '#5B8C3E';
+          } else if (tx.type === 'manufacturing') {
+            action = 'manufacturing';
+            icon = 'phone-portrait';
+            color = '#F5A623';
+          } else if (tx.type === 'commission') {
+            action = 'commission';
+            icon = 'people';
+            color = '#9B59B6';
+          } else if (tx.type === 'device_sale') {
+            action = 'sale';
+            icon = 'storefront';
+            color = '#E74C3C';
+          } else if (tx.type === 'device_purchase') {
+            action = 'purchase';
+            icon = 'cart';
+            color = '#3498DB';
+          } else if (tx.type === 'signup_fee') {
+            action = 'signup';
+            icon = 'person-add';
+            color = '#2ECC71';
+          }
+
+          feed.push({
+            id: `tx_${tx.id}`,
+            user: userMap[tx.toUserId] || tx.toUserId,
+            action,
+            amount: amt,
+            icon,
+            color,
+            isPositive: ['transfer_received', 'commission', 'device_sale', 'manufacturing'].includes(tx.type),
+            time: tx.createdAt,
+          });
+        });
+
+        allWithdrawals.forEach(w => {
+          feed.push({
+            id: `wd_${w.id}`,
+            user: userMap[w.userId] || w.userId,
+            action: 'withdraw',
+            amount: parseFloat(w.amount || '0'),
+            icon: 'arrow-up-circle',
+            color: '#E74C3C',
+            isPositive: false,
+            method: w.method,
+            status: w.status,
+            time: w.createdAt,
+          });
+        });
+
+        feed.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+        return res.json({ feed: feed.slice(0, 30) });
+      } catch (error: any) {
+        console.error("Activity feed error:", error);
+        return res.status(500).json({ message: "Failed to load activity feed" });
       }
     },
   );
