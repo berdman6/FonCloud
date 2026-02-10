@@ -2,7 +2,7 @@
 
 ## Overview
 
-Foncloud is a mobile-first application built with Expo (React Native) and an Express.js backend. It's a referral-based platform where users can register (with a referral code), manufacture virtual devices, trade them on a marketplace, manage a wallet with transfers and withdrawals, and earn commissions through a multi-level referral system. The app features a dark neon-green theme with Bengali/English bilingual support.
+Foncloud is a mobile-first application built with Expo (React Native) and an Express.js backend. It's a referral-based platform where users can register (with a referral code), manufacture virtual devices, trade them on a marketplace, manage a wallet with transfers and withdrawals, and earn commissions through a multi-level referral system. The app supports dual themes (dark/light) with neon-green accents and Bengali/English bilingual support.
 
 ## User Preferences
 
@@ -18,10 +18,10 @@ Preferred communication style: Simple, everyday language.
   - `app/(main)/` - Authenticated screens: home, wallet, manufacturing, marketplace, withdrawals, profile, referrals
 - **Main Layout**: Custom animated drawer navigation in `app/(main)/_layout.tsx` (not using a tab bar or standard drawer library)
 - **State Management**: TanStack React Query for server state, React Context for auth (`lib/auth-context.tsx`) and i18n (`lib/i18n.tsx`)
-- **Styling**: StyleSheet-based with a centralized color theme in `constants/colors.ts` (light theme, olive green `#5B8C3E`, orange accent `#F5A623`)
+- **Styling**: StyleSheet-based with dynamic theme colors via `useThemeColors()` hook from `lib/theme-context.tsx`. Color definitions in `constants/colors.ts` with `dark` and `light` palettes. Dark theme: black #0A0A0A background, neon green #39FF14 primary, orange #F5A623 accent. Light theme: off-white #F5F5F0 background, neon green #39FF14 primary, orange #F5A623 accent. Theme persisted via AsyncStorage.
 - **Fonts**: Hind Siliguri font family (Google Fonts via `@expo-google-fonts/hind-siliguri`) - classic Bengali/English readability
 - **Animations**: react-native-reanimated throughout for entrance animations, drawer, manufacturing timer, and FloatingBackground component
-- **FloatingBackground**: Subtle animated floating dots on home screen (`components/FloatingBackground.tsx`) - olive green particles with very low opacity
+- **FloatingBackground**: Subtle animated floating dots on home screen (`components/FloatingBackground.tsx`) - equal mix of neon green, orange, and black particles with very low opacity
 - **Notifications**: `expo-notifications` for local push notifications when devices are manufactured (sold out alerts at 5/19/31 min)
 - **Sharing**: `expo-clipboard` for copy-to-clipboard, native `Share` API for referral link sharing
 - **i18n**: Custom implementation supporting Bengali (`bn`) and English (`en`), stored in AsyncStorage
