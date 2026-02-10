@@ -10,11 +10,14 @@ export default function IndexScreen() {
 
   useEffect(() => {
     if (!isLoading) {
-      if (isAuthenticated) {
-        router.replace('/(main)/home');
-      } else {
-        router.replace('/(auth)/login');
-      }
+      const timer = setTimeout(() => {
+        if (isAuthenticated) {
+          router.replace('/(main)/home');
+        } else {
+          router.replace('/(auth)/login');
+        }
+      }, 5000);
+      return () => clearTimeout(timer);
     }
   }, [isLoading, isAuthenticated]);
 
