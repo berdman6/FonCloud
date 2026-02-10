@@ -20,7 +20,7 @@ export default function IndexScreen() {
 
   return (
     <View style={styles.container}>
-      <PortalAnimation size={180} />
+      <PortalAnimation size={220} />
       <Text style={styles.title}>FonCloud</Text>
       <ActivityIndicator color="#FFFFFF" size="small" style={{ marginTop: 24 }} />
     </View>

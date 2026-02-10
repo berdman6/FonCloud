@@ -233,7 +233,7 @@ export default function HomeScreen() {
       >
         <View style={styles.welcomeSection}>
           <View style={styles.portalWrap}>
-            <PortalAnimation size={180} />
+            <PortalAnimation size={240} />
           </View>
           <Text style={styles.welcomeText}>{t('welcomeBack')}</Text>
           <Text style={styles.userName}>{user?.displayName || 'User'}</Text>

@@ -118,13 +118,13 @@ export function PortalAnimation({ size = 200 }: { size?: number }) {
     opacity: interpolate(pulse.value, [0, 1], [0.95, 1]),
   }));
 
-  const coinL = size * 0.24;
-  const coinM = size * 0.2;
+  const coinL = size * 0.22;
+  const coinM = size * 0.19;
   const coinS = size * 0.17;
 
   const imgSize = size * 1.0;
-  const totalW = size * 1.35;
-  const totalH = size * 1.15;
+  const totalW = size * 1.2;
+  const totalH = size * 1.1;
 
   return (
     <View style={[st.container, { width: totalW, height: totalH }]}>
@@ -136,26 +136,26 @@ export function PortalAnimation({ size = 200 }: { size?: number }) {
         />
       </AV>
 
-      <Coin3D delay={0} sz={coinL} x={size * 0.74} y={size * 0.16} orbit={16} drift={5} dur={4200}>
+      <Coin3D delay={0} sz={coinL} x={size * 0.68} y={size * 0.12} orbit={14} drift={4} dur={4200}>
         <Ionicons name="phone-portrait" size={coinL * 0.42} color="#FFFFFF" />
       </Coin3D>
 
-      <Coin3D delay={600} sz={coinM} x={size * 0.08} y={size * 0.1} orbit={12} drift={6} dur={4600}>
-        <Text style={[st.coinTxt, { fontSize: coinM * 0.28 }]}>BDTK</Text>
+      <Coin3D delay={600} sz={coinM} x={size * 0.12} y={size * 0.08} orbit={12} drift={5} dur={4600}>
+        <Text style={[st.coinTxt, { fontSize: coinM * 0.42 }]}>৳</Text>
       </Coin3D>
 
-      <Coin3D delay={1200} sz={coinS} x={size * 0.0} y={size * 0.52} orbit={10} drift={4} dur={5000}>
-        <Text style={[st.logoTxt, { fontSize: coinS * 0.34 }]}>FC</Text>
+      <Coin3D delay={1200} sz={coinS} x={size * 0.04} y={size * 0.48} orbit={10} drift={4} dur={5000}>
+        <Text style={[st.logoTxt, { fontSize: coinS * 0.42 }]}>$</Text>
       </Coin3D>
 
       <Sparkle delay={0} x={size * 0.06} y={size * 0.06} dotSz={4.5} />
-      <Sparkle delay={400} x={size * 1.14} y={size * 0.22} dotSz={3.5} />
-      <Sparkle delay={800} x={size * 0.02} y={size * 0.8} dotSz={5} />
-      <Sparkle delay={1200} x={size * 1.18} y={size * 0.62} dotSz={3} />
-      <Sparkle delay={600} x={size * 0.58} y={size * -0.02} dotSz={4} />
-      <Sparkle delay={1000} x={size * 0.92} y={size * 0.0} dotSz={3} />
-      <Sparkle delay={300} x={size * 1.22} y={size * 0.45} dotSz={2.5} />
-      <Sparkle delay={900} x={size * 0.32} y={size * 0.92} dotSz={3.5} />
+      <Sparkle delay={400} x={size * 1.02} y={size * 0.22} dotSz={3.5} />
+      <Sparkle delay={800} x={size * 0.02} y={size * 0.78} dotSz={5} />
+      <Sparkle delay={1200} x={size * 1.05} y={size * 0.58} dotSz={3} />
+      <Sparkle delay={600} x={size * 0.55} y={size * -0.02} dotSz={4} />
+      <Sparkle delay={1000} x={size * 0.88} y={size * 0.0} dotSz={3} />
+      <Sparkle delay={300} x={size * 1.08} y={size * 0.42} dotSz={2.5} />
+      <Sparkle delay={900} x={size * 0.3} y={size * 0.88} dotSz={3.5} />
     </View>
   );
 }
