@@ -1,41 +1,97 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Linking } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, Pressable, StyleSheet, Platform, Linking, Modal } from 'react-native';
 import { Stack, router, usePathname } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolate, Easing } from 'react-native-reanimated';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  interpolate,
+  Easing,
+  withSequence,
+} from 'react-native-reanimated';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { useNotifications } from '@/lib/notifications-context';
 import Colors from '@/constants/colors';
 
-interface DrawerItemProps {
-  icon: React.ReactNode;
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+interface TabItemProps {
+  icon: string;
+  iconSet?: 'ionicons' | 'material';
   label: string;
-  route: string;
   active: boolean;
-  onPress: () => void;
   badge?: number;
+  onPress: () => void;
 }
 
-function DrawerItem({ icon, label, active, onPress, badge }: DrawerItemProps) {
+function TabItem({ icon, iconSet = 'ionicons', label, active, badge, onPress }: TabItemProps) {
+  const scale = useSharedValue(1);
+  const translateY = useSharedValue(0);
+
+  const handlePress = useCallback(() => {
+    scale.value = withSequence(
+      withTiming(0.8, { duration: 80 }),
+      withSpring(1, { damping: 12, stiffness: 200 })
+    );
+    translateY.value = withSequence(
+      withTiming(-4, { duration: 80 }),
+      withSpring(0, { damping: 12, stiffness: 200 })
+    );
+    onPress();
+  }, [onPress]);
+
+  const iconAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }, { translateY: translateY.value }],
+  }));
+
+  const iconColor = active ? Colors.dark.primary : Colors.dark.tabIconDefault;
+  const IconComponent = iconSet === 'material' ? MaterialCommunityIcons : Ionicons;
+
+  return (
+    <Pressable onPress={handlePress} style={styles.tabItem}>
+      <Animated.View style={[styles.tabIconWrap, iconAnimStyle]}>
+        {active && <View style={styles.tabActiveIndicator} />}
+        <IconComponent name={icon as any} size={24} color={iconColor} />
+        {badge !== undefined && badge > 0 && (
+          <View style={styles.tabBadge}>
+            <Text style={styles.tabBadgeText}>{badge > 9 ? '9+' : badge}</Text>
+          </View>
+        )}
+      </Animated.View>
+      <Text style={[styles.tabLabel, active && styles.tabLabelActive]} numberOfLines={1}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+interface MoreSheetItemProps {
+  icon: string;
+  label: string;
+  onPress: () => void;
+  color?: string;
+  badge?: number;
+  right?: React.ReactNode;
+}
+
+function MoreSheetItem({ icon, label, onPress, color, badge, right }: MoreSheetItemProps) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.drawerItem,
-        active && styles.drawerItemActive,
-        pressed && { opacity: 0.7 },
-      ]}
+      style={({ pressed }) => [styles.moreItem, pressed && { backgroundColor: Colors.dark.primaryDim }]}
     >
-      {icon}
-      <Text style={[styles.drawerItemText, active && styles.drawerItemTextActive]}>{label}</Text>
+      <Ionicons name={icon as any} size={22} color={color || Colors.dark.textSecondary} />
+      <Text style={[styles.moreItemText, color ? { color } : null]}>{label}</Text>
       {badge !== undefined && badge > 0 && (
-        <View style={styles.drawerBadge}>
-          <Text style={styles.drawerBadgeText}>{badge > 9 ? '9+' : badge}</Text>
+        <View style={styles.moreBadge}>
+          <Text style={styles.moreBadgeText}>{badge > 9 ? '9+' : badge}</Text>
         </View>
       )}
-      {active && <View style={styles.activeIndicator} />}
+      {right}
     </Pressable>
   );
 }
@@ -46,48 +102,25 @@ export default function MainLayout() {
   const { user, logout } = useAuth();
   const { t, currentLanguage, toggleLanguage } = useLanguage();
   const { unreadCount } = useNotifications();
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const drawerAnim = useSharedValue(0);
+  const [moreOpen, setMoreOpen] = useState(false);
 
-  const openDrawer = () => {
-    setDrawerOpen(true);
-    drawerAnim.value = withTiming(1, { duration: 280, easing: Easing.out(Easing.cubic) });
-  };
+  const navigateTo = useCallback((route: string) => {
+    setMoreOpen(false);
+    router.push(route as any);
+  }, []);
 
-  const closeDrawer = () => {
-    drawerAnim.value = withTiming(0, { duration: 250, easing: Easing.in(Easing.cubic) });
-    setTimeout(() => setDrawerOpen(false), 260);
-  };
-
-  const navigateTo = (route: string) => {
-    closeDrawer();
-    setTimeout(() => router.push(route as any), 280);
-  };
-
-  const handleLogout = async () => {
-    closeDrawer();
+  const handleLogout = useCallback(async () => {
+    setMoreOpen(false);
     await logout();
     router.replace('/(auth)/login');
-  };
+  }, [logout]);
 
-  const overlayStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(drawerAnim.value, [0, 1], [0, 0.6]),
-  }));
+  const isActive = (screen: string) => pathname.includes(screen);
 
-  const drawerStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: interpolate(drawerAnim.value, [0, 1], [-300, 0]) }],
-  }));
+  const moreScreensActive = isActive('withdrawal') || isActive('referral') || isActive('profile') || isActive('notification');
 
-  const menuItems = [
-    { icon: <Ionicons name="home-outline" size={22} color={pathname.includes('home') ? Colors.dark.primary : Colors.dark.textSecondary} />, label: t('home'), route: '/(main)/home' },
-    { icon: <Ionicons name="wallet-outline" size={22} color={pathname.includes('wallet') ? Colors.dark.primary : Colors.dark.textSecondary} />, label: t('wallet'), route: '/(main)/wallet' },
-    { icon: <MaterialCommunityIcons name="factory" size={22} color={pathname.includes('manufacturing') ? Colors.dark.primary : Colors.dark.textSecondary} />, label: t('manufacturing'), route: '/(main)/manufacturing' },
-    { icon: <Ionicons name="storefront-outline" size={22} color={pathname.includes('marketplace') ? Colors.dark.primary : Colors.dark.textSecondary} />, label: t('marketplace'), route: '/(main)/marketplace' },
-    { icon: <Ionicons name="arrow-down-circle-outline" size={22} color={pathname.includes('withdrawal') ? Colors.dark.primary : Colors.dark.textSecondary} />, label: t('withdrawals'), route: '/(main)/withdrawals' },
-    { icon: <Ionicons name="people-outline" size={22} color={pathname.includes('referral') ? Colors.dark.primary : Colors.dark.textSecondary} />, label: t('referrals'), route: '/(main)/referrals' },
-    { icon: <Ionicons name="person-outline" size={22} color={pathname.includes('profile') ? Colors.dark.primary : Colors.dark.textSecondary} />, label: t('profile'), route: '/(main)/profile' },
-    { icon: <Ionicons name="notifications-outline" size={22} color={pathname.includes('notification') ? Colors.dark.primary : Colors.dark.textSecondary} />, label: t('notifications'), route: '/(main)/notifications', badge: unreadCount },
-  ];
+  const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
+  const tabBarHeight = 60 + bottomPad;
 
   return (
     <View style={styles.container}>
@@ -97,11 +130,7 @@ export default function MainLayout() {
           headerStyle: { backgroundColor: Colors.dark.background },
           headerTintColor: Colors.dark.text,
           headerTitleStyle: { fontFamily: 'HindSiliguri_600SemiBold', fontSize: 18 },
-          headerLeft: () => (
-            <Pressable onPress={openDrawer} style={styles.menuBtn}>
-              <Ionicons name="menu" size={26} color={Colors.dark.primary} />
-            </Pressable>
-          ),
+          headerLeft: () => null,
           headerRight: () => (
             <Pressable onPress={() => navigateTo('/(main)/notifications')} style={styles.bellBtn}>
               <Ionicons name="notifications-outline" size={22} color={Colors.dark.primary} />
@@ -113,7 +142,7 @@ export default function MainLayout() {
             </Pressable>
           ),
           contentStyle: { backgroundColor: Colors.dark.background },
-          headerShadowVisible: true,
+          headerShadowVisible: false,
         }}
       >
         <Stack.Screen name="home" options={{ title: 'FonCloud' }} />
@@ -126,67 +155,114 @@ export default function MainLayout() {
         <Stack.Screen name="notifications" options={{ title: t('notifications') }} />
       </Stack>
 
-      {drawerOpen && (
-        <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-          <Pressable onPress={closeDrawer} style={StyleSheet.absoluteFill}>
-            <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: '#000' }, overlayStyle]} />
-          </Pressable>
+      <View style={[styles.tabBar, { height: tabBarHeight, paddingBottom: bottomPad }]}>
+        <TabItem
+          icon={isActive('home') ? 'home' : 'home-outline'}
+          label={t('home')}
+          active={isActive('home')}
+          onPress={() => navigateTo('/(main)/home')}
+        />
+        <TabItem
+          icon="factory"
+          iconSet="material"
+          label={t('manufacturing')}
+          active={isActive('manufacturing')}
+          onPress={() => navigateTo('/(main)/manufacturing')}
+        />
+        <TabItem
+          icon={isActive('marketplace') ? 'storefront' : 'storefront-outline'}
+          label={t('marketplace')}
+          active={isActive('marketplace')}
+          onPress={() => navigateTo('/(main)/marketplace')}
+        />
+        <TabItem
+          icon={isActive('wallet') ? 'wallet' : 'wallet-outline'}
+          label={t('wallet')}
+          active={isActive('wallet')}
+          onPress={() => navigateTo('/(main)/wallet')}
+        />
+        <TabItem
+          icon={moreOpen || moreScreensActive ? 'grid' : 'grid-outline'}
+          label={t('more') || 'More'}
+          active={moreScreensActive}
+          onPress={() => setMoreOpen(true)}
+        />
+      </View>
 
-          <Animated.View style={[styles.drawer, drawerStyle, { paddingTop: insets.top + (Platform.OS === 'web' ? 67 : 10) }]}>
-            <View style={styles.drawerProfile}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{user?.displayName?.charAt(0)?.toUpperCase() || 'F'}</Text>
+      <Modal
+        visible={moreOpen}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setMoreOpen(false)}
+      >
+        <Pressable style={styles.moreOverlay} onPress={() => setMoreOpen(false)}>
+          <Pressable
+            style={[styles.moreSheet, { paddingBottom: bottomPad + 12 }]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={styles.moreHandle} />
+
+            <View style={styles.moreProfileRow}>
+              <View style={styles.moreAvatar}>
+                <Text style={styles.moreAvatarText}>{user?.displayName?.charAt(0)?.toUpperCase() || 'F'}</Text>
               </View>
-              <Text style={styles.profileName}>{user?.displayName || 'User'}</Text>
-              <Text style={styles.profileId}>ID: {user?.userId || '---'}</Text>
-              <View style={styles.balanceRow}>
-                <Ionicons name="diamond-outline" size={14} color="#FFFFFF" />
-                <Text style={styles.balanceText}>{t('totalCredits')}: {Number(user?.walletBalance || 0).toFixed(2)}</Text>
+              <View style={styles.moreProfileInfo}>
+                <Text style={styles.moreProfileName}>{user?.displayName || 'User'}</Text>
+                <Text style={styles.moreProfileId}>ID: {user?.userId || '---'}</Text>
               </View>
             </View>
 
-            <View style={styles.drawerDivider} />
+            <View style={styles.moreDivider} />
 
-            <ScrollView style={styles.drawerMenu} showsVerticalScrollIndicator={false}>
-              {menuItems.map((item: any) => (
-                <DrawerItem
-                  key={item.route}
-                  icon={item.icon}
-                  label={item.label}
-                  route={item.route}
-                  active={pathname.includes(item.route.split('/').pop() || '')}
-                  onPress={() => navigateTo(item.route)}
-                  badge={item.badge}
-                />
-              ))}
-            </ScrollView>
+            <MoreSheetItem
+              icon="arrow-down-circle-outline"
+              label={t('withdrawals')}
+              onPress={() => navigateTo('/(main)/withdrawals')}
+            />
+            <MoreSheetItem
+              icon="people-outline"
+              label={t('referrals')}
+              onPress={() => navigateTo('/(main)/referrals')}
+            />
+            <MoreSheetItem
+              icon="person-outline"
+              label={t('profile')}
+              onPress={() => navigateTo('/(main)/profile')}
+            />
+            <MoreSheetItem
+              icon="notifications-outline"
+              label={t('notifications')}
+              onPress={() => navigateTo('/(main)/notifications')}
+              badge={unreadCount}
+            />
 
-            <View style={styles.drawerDivider} />
+            <View style={styles.moreDivider} />
 
-            <View style={styles.drawerBottom}>
-              <Pressable onPress={toggleLanguage} style={styles.drawerBottomItem}>
-                <Ionicons name="language" size={20} color={Colors.dark.textSecondary} />
-                <Text style={styles.drawerBottomText}>{t('switchLanguage')}</Text>
-                <View style={styles.langBadge}>
-                  <Text style={styles.langBadgeText}>{currentLanguage.toUpperCase()}</Text>
+            <MoreSheetItem
+              icon="language"
+              label={t('switchLanguage')}
+              onPress={() => { toggleLanguage(); setMoreOpen(false); }}
+              right={
+                <View style={styles.langChip}>
+                  <Text style={styles.langChipText}>{currentLanguage.toUpperCase()}</Text>
                 </View>
-              </Pressable>
-
-              <Pressable onPress={() => Linking.openURL('https://t.me/FonCloudSupport')} style={styles.drawerBottomItem}>
-                <Ionicons name="paper-plane-outline" size={20} color={Colors.dark.textSecondary} />
-                <Text style={styles.drawerBottomText}>{t('support')}</Text>
-              </Pressable>
-
-              <Pressable onPress={handleLogout} style={styles.drawerBottomItem}>
-                <Ionicons name="log-out-outline" size={20} color={Colors.dark.danger} />
-                <Text style={[styles.drawerBottomText, { color: Colors.dark.danger }]}>{t('logout')}</Text>
-              </Pressable>
-            </View>
-
-            <View style={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 10) }} />
-          </Animated.View>
-        </View>
-      )}
+              }
+            />
+            <MoreSheetItem
+              icon="paper-plane-outline"
+              label={t('support')}
+              onPress={() => { Linking.openURL('https://t.me/FonCloudSupport'); setMoreOpen(false); }}
+            />
+            <MoreSheetItem
+              icon="log-out-outline"
+              label={t('logout')}
+              onPress={handleLogout}
+              color={Colors.dark.danger}
+            />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -195,13 +271,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark.background,
-  },
-  menuBtn: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 4,
   },
   bellBtn: {
     width: 40,
@@ -227,133 +296,139 @@ const styles = StyleSheet.create({
     fontFamily: 'HindSiliguri_700Bold',
     color: '#FFFFFF',
   },
-  drawer: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 280,
+  tabBar: {
+    flexDirection: 'row',
     backgroundColor: Colors.dark.surface,
-    borderRightWidth: 0,
+    borderTopWidth: 1,
+    borderTopColor: Colors.dark.divider,
+    alignItems: 'flex-start',
+    paddingTop: 6,
     shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    shadowOffset: { width: 2, height: 0 },
-    elevation: 8,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: -3 },
+    elevation: 10,
   },
-  drawerProfile: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+  tabItem: {
+    flex: 1,
     alignItems: 'center',
-    backgroundColor: Colors.dark.primary,
+    justifyContent: 'center',
+    gap: 2,
   },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
+  tabIconWrap: {
+    width: 36,
+    height: 30,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: {
-    fontSize: 24,
-    fontFamily: 'HindSiliguri_700Bold',
-    color: '#FFFFFF',
-  },
-  profileName: {
-    fontSize: 18,
-    fontFamily: 'HindSiliguri_600SemiBold',
-    color: '#FFFFFF',
-    marginTop: 10,
-  },
-  profileId: {
-    fontSize: 12,
-    fontFamily: 'HindSiliguri_400Regular',
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: 2,
-  },
-  balanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 8,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  balanceText: {
-    fontSize: 13,
-    fontFamily: 'HindSiliguri_500Medium',
-    color: '#FFFFFF',
-  },
-  drawerDivider: {
-    height: 1,
-    backgroundColor: Colors.dark.divider,
-    marginHorizontal: 16,
-  },
-  drawerMenu: {
-    flex: 1,
-    paddingVertical: 8,
-  },
-  drawerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 13,
-    gap: 14,
-    marginHorizontal: 8,
-    borderRadius: 10,
-  },
-  drawerItemActive: {
-    backgroundColor: Colors.dark.primaryDim,
-  },
-  drawerItemText: {
-    fontSize: 15,
-    fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textSecondary,
-    flex: 1,
-  },
-  drawerItemTextActive: {
-    color: Colors.dark.primary,
-    fontFamily: 'HindSiliguri_600SemiBold',
-  },
-  activeIndicator: {
-    width: 4,
-    height: 4,
+  tabActiveIndicator: {
+    position: 'absolute',
+    top: -4,
+    width: 20,
+    height: 3,
     borderRadius: 2,
     backgroundColor: Colors.dark.primary,
   },
-  drawerBottom: {
-    paddingVertical: 8,
+  tabBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -6,
+    backgroundColor: Colors.dark.danger,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
   },
-  drawerBottomItem: {
+  tabBadgeText: {
+    fontSize: 9,
+    fontFamily: 'HindSiliguri_700Bold',
+    color: '#FFFFFF',
+  },
+  tabLabel: {
+    fontSize: 10,
+    fontFamily: 'HindSiliguri_500Medium',
+    color: Colors.dark.tabIconDefault,
+  },
+  tabLabelActive: {
+    color: Colors.dark.primary,
+    fontFamily: 'HindSiliguri_600SemiBold',
+  },
+  moreOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  moreSheet: {
+    backgroundColor: Colors.dark.surface,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 8,
+  },
+  moreHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.dark.divider,
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
+  moreProfileRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 10,
     gap: 14,
   },
-  drawerBottomText: {
-    fontSize: 14,
-    fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textSecondary,
+  moreAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.dark.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moreAvatarText: {
+    fontSize: 20,
+    fontFamily: 'HindSiliguri_700Bold',
+    color: '#FFFFFF',
+  },
+  moreProfileInfo: {
     flex: 1,
   },
-  langBadge: {
-    backgroundColor: Colors.dark.primaryDim,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
-  langBadgeText: {
-    fontSize: 11,
+  moreProfileName: {
+    fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.primary,
+    color: Colors.dark.text,
   },
-  drawerBadge: {
+  moreProfileId: {
+    fontSize: 12,
+    fontFamily: 'HindSiliguri_400Regular',
+    color: Colors.dark.textSecondary,
+  },
+  moreDivider: {
+    height: 1,
+    backgroundColor: Colors.dark.divider,
+    marginHorizontal: 16,
+    marginVertical: 6,
+  },
+  moreItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    gap: 14,
+    borderRadius: 10,
+    marginHorizontal: 8,
+  },
+  moreItemText: {
+    fontSize: 15,
+    fontFamily: 'HindSiliguri_500Medium',
+    color: Colors.dark.text,
+    flex: 1,
+  },
+  moreBadge: {
     backgroundColor: Colors.dark.danger,
     borderRadius: 10,
     minWidth: 20,
@@ -362,9 +437,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 5,
   },
-  drawerBadgeText: {
+  moreBadgeText: {
     fontSize: 10,
     fontFamily: 'HindSiliguri_700Bold',
     color: '#FFFFFF',
+  },
+  langChip: {
+    backgroundColor: Colors.dark.primaryDim,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  langChipText: {
+    fontSize: 11,
+    fontFamily: 'HindSiliguri_600SemiBold',
+    color: Colors.dark.primary,
   },
 });

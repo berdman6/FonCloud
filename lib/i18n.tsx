@@ -43,7 +43,7 @@ const translations: { [key in Language]: Translations } = {
     usernameEmailPhone: 'ইউজারনেম / ইমেইল / ফোন',
     optional: '(ঐচ্ছিক)',
 
-    // Navigation/Drawer
+    // Navigation
     home: 'হোম',
     wallet: 'ওয়ালেট',
     manufacturing: 'ম্যানুফ্যাকচারিং',
@@ -52,6 +52,7 @@ const translations: { [key in Language]: Translations } = {
     profile: 'প্রোফাইল',
     referrals: 'রেফারেল',
     logout: 'লগআউট',
+    more: 'আরও',
     support: 'সহায়তা',
     settings: 'সেটিংস',
     language: 'ভাষা',
@@ -263,7 +264,7 @@ const translations: { [key in Language]: Translations } = {
     usernameEmailPhone: 'Username / Email / Phone',
     optional: '(optional)',
 
-    // Navigation/Drawer
+    // Navigation
     home: 'Home',
     wallet: 'Wallet',
     manufacturing: 'Manufacturing',
@@ -272,6 +273,7 @@ const translations: { [key in Language]: Translations } = {
     profile: 'Profile',
     referrals: 'Referrals',
     logout: 'Logout',
+    more: 'More',
     support: 'Support',
     settings: 'Settings',
     language: 'Language',
