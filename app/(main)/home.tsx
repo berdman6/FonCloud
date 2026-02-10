@@ -166,9 +166,36 @@ function FeedRow({ item, index, t }: { item: any; index: number; t: (k: string) 
   );
 }
 
+const FEED_ROW_HEIGHT = 42;
+const FEED_VISIBLE_ROWS = 6;
+const FEED_SCROLL_INTERVAL = 2500;
+
 function ActivityFeed({ t }: { t: (k: string) => string }) {
   const { data } = useQuery<any>({ queryKey: ['/api/dashboard/activity-feed'] });
   const feed = data?.feed || [];
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollPos = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const maxHeight = FEED_ROW_HEIGHT * FEED_VISIBLE_ROWS;
+  const items = feed.slice(0, 20);
+  const totalHeight = items.length * FEED_ROW_HEIGHT;
+
+  useEffect(() => {
+    if (items.length <= FEED_VISIBLE_ROWS) return;
+
+    timerRef.current = setInterval(() => {
+      scrollPos.current += FEED_ROW_HEIGHT;
+      if (scrollPos.current >= totalHeight - maxHeight + FEED_ROW_HEIGHT) {
+        scrollPos.current = 0;
+      }
+      scrollRef.current?.scrollTo({ y: scrollPos.current, animated: true });
+    }, FEED_SCROLL_INTERVAL);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [items.length, totalHeight]);
 
   if (feed.length === 0) {
     return null;
@@ -193,9 +220,18 @@ function ActivityFeed({ t }: { t: (k: string) => string }) {
           <View style={{ width: 24 }} />
         </View>
 
-        {feed.slice(0, 15).map((item: any, idx: number) => (
-          <FeedRow key={item.id} item={item} index={idx} t={t} />
-        ))}
+        <View style={{ height: maxHeight, overflow: 'hidden' }}>
+          <ScrollView
+            ref={scrollRef}
+            scrollEnabled={false}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled
+          >
+            {items.map((item: any, idx: number) => (
+              <FeedRow key={item.id} item={item} index={idx} t={t} />
+            ))}
+          </ScrollView>
+        </View>
       </View>
     </View>
   );
