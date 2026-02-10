@@ -6,12 +6,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { FloatingBackground } from '@/components/FloatingBackground';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const { login } = useAuth();
   const { t, currentLanguage, toggleLanguage } = useLanguage();
+  const colors = useThemeColors();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,7 +44,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
       <FloatingBackground />
       <KeyboardAvoidingView
         style={styles.container}
@@ -53,27 +54,27 @@ export default function LoginScreen() {
           contentContainerStyle={[styles.scroll, { paddingTop: insets.top + (Platform.OS === 'web' ? 67 : 40), paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 40) }]}
           keyboardShouldPersistTaps="handled"
         >
-          <Pressable onPress={toggleLanguage} style={styles.langToggle}>
-            <Ionicons name="language" size={16} color={Colors.dark.neonGreen} />
-            <Text style={styles.langText}>{currentLanguage === 'bn' ? 'EN' : 'BN'}</Text>
+          <Pressable onPress={toggleLanguage} style={[styles.langToggle, { borderColor: colors.cardBorder }]}>
+            <Ionicons name="language" size={16} color={colors.neonGreen} />
+            <Text style={[styles.langText, { color: colors.neonGreen }]}>{currentLanguage === 'bn' ? 'EN' : 'BN'}</Text>
           </Pressable>
 
-          <Text style={styles.title}>{t('login')}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('login')}</Text>
 
           {step === 'email' ? (
-            <View style={styles.card}>
+            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
               <View style={styles.tabRow}>
                 <Pressable style={[styles.tab, styles.tabActive]}>
-                  <Text style={styles.tabTextActive}>{t('usernameEmailPhone')}</Text>
-                  <View style={styles.tabIndicator} />
+                  <Text style={[styles.tabTextActive, { color: colors.text }]}>{t('usernameEmailPhone')}</Text>
+                  <View style={[styles.tabIndicator, { backgroundColor: colors.neonGreen }]} />
                 </Pressable>
               </View>
 
-              <View style={styles.inputWrap}>
+              <View style={[styles.inputWrap, { borderColor: colors.inputBorder, backgroundColor: colors.inputBg }]}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   placeholder={t('usernameEmailPhone')}
-                  placeholderTextColor={Colors.dark.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   value={username}
                   onChangeText={setUsername}
                   autoCapitalize="none"
@@ -82,70 +83,70 @@ export default function LoginScreen() {
                 />
                 {username.length > 0 && (
                   <Pressable onPress={() => setUsername('')} style={styles.clearBtn}>
-                    <Ionicons name="close-circle" size={20} color={Colors.dark.textMuted} />
+                    <Ionicons name="close-circle" size={20} color={colors.textMuted} />
                   </Pressable>
                 )}
               </View>
 
               <Pressable
                 onPress={handleNext}
-                style={({ pressed }) => [styles.mainButton, pressed && { opacity: 0.85 }]}
+                style={({ pressed }) => [styles.mainButton, { backgroundColor: colors.black, borderColor: colors.neonGreen, shadowColor: colors.neonGreen }, pressed && { opacity: 0.85 }]}
               >
-                <Text style={styles.mainButtonText}>{t('next') || 'Next'}</Text>
+                <Text style={[styles.mainButtonText, { color: colors.neonGreen }]}>{t('next') || 'Next'}</Text>
               </Pressable>
             </View>
           ) : (
-            <View style={styles.card}>
+            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
               <View style={styles.tabRow}>
                 <Pressable style={[styles.tab, styles.tabActive]}>
-                  <Text style={styles.tabTextActive}>{t('usernameEmailPhone')}</Text>
-                  <View style={styles.tabIndicator} />
+                  <Text style={[styles.tabTextActive, { color: colors.text }]}>{t('usernameEmailPhone')}</Text>
+                  <View style={[styles.tabIndicator, { backgroundColor: colors.neonGreen }]} />
                 </Pressable>
               </View>
 
-              <View style={styles.inputWrap}>
-                <Text style={styles.inputLabel}>{t('usernameEmailPhone')}</Text>
+              <View style={[styles.inputWrap, { borderColor: colors.inputBorder, backgroundColor: colors.inputBg }]}>
+                <Text style={[styles.inputLabel, { backgroundColor: colors.card, color: colors.textSecondary }]}>{t('usernameEmailPhone')}</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   value={username}
                   onChangeText={setUsername}
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
                 <Pressable onPress={() => { setUsername(''); setStep('email'); }} style={styles.clearBtn}>
-                  <Ionicons name="close-circle" size={20} color={Colors.dark.textMuted} />
+                  <Ionicons name="close-circle" size={20} color={colors.textMuted} />
                 </Pressable>
               </View>
 
-              <View style={styles.inputWrap}>
-                <Text style={styles.inputLabel}>{t('enterPassword')}</Text>
+              <View style={[styles.inputWrap, { borderColor: colors.inputBorder, backgroundColor: colors.inputBg }]}>
+                <Text style={[styles.inputLabel, { backgroundColor: colors.card, color: colors.textSecondary }]}>{t('enterPassword')}</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   placeholder={t('enterPassword')}
-                  placeholderTextColor={Colors.dark.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                 />
                 <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.clearBtn}>
-                  <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={Colors.dark.textMuted} />
+                  <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={colors.textMuted} />
                 </Pressable>
               </View>
 
               <Pressable
                 onPress={handleLogin}
                 disabled={loading}
-                style={({ pressed }) => [styles.mainButton, loading && { opacity: 0.5 }, pressed && { opacity: 0.85 }]}
+                style={({ pressed }) => [styles.mainButton, { backgroundColor: colors.black, borderColor: colors.neonGreen, shadowColor: colors.neonGreen }, loading && { opacity: 0.5 }, pressed && { opacity: 0.85 }]}
               >
-                <Text style={styles.mainButtonText}>{loading ? '...' : t('loginButton')}</Text>
+                <Text style={[styles.mainButtonText, { color: colors.neonGreen }]}>{loading ? '...' : t('loginButton')}</Text>
               </Pressable>
             </View>
           )}
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>{t('noAccount')}</Text>
+            <Text style={[styles.footerText, { color: colors.textSecondary }]}>{t('noAccount')}</Text>
             <Pressable onPress={() => router.push('/(auth)/register')}>
-              <Text style={styles.footerLink}> {t('register')}</Text>
+              <Text style={[styles.footerLink, { color: colors.neonOrange }]}> {t('register')}</Text>
             </Pressable>
           </View>
         </ScrollView>
@@ -157,7 +158,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
   },
   container: {
     flex: 1,
@@ -175,26 +175,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
     marginBottom: 24,
   },
   langText: {
-    color: Colors.dark.neonGreen,
     fontFamily: 'HindSiliguri_600SemiBold',
     fontSize: 13,
   },
   title: {
     fontSize: 32,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.text,
     marginBottom: 28,
   },
   card: {
-    backgroundColor: Colors.dark.card,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
     gap: 18,
   },
   tabRow: {
@@ -209,21 +204,17 @@ const styles = StyleSheet.create({
   tabTextActive: {
     fontFamily: 'HindSiliguri_600SemiBold',
     fontSize: 15,
-    color: Colors.dark.text,
   },
   tabIndicator: {
     height: 2,
-    backgroundColor: Colors.dark.neonGreen,
     borderRadius: 1,
     marginTop: 4,
   },
   inputWrap: {
     borderWidth: 1,
-    borderColor: Colors.dark.inputBorder,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 4,
-    backgroundColor: Colors.dark.inputBg,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -231,15 +222,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -10,
     left: 12,
-    backgroundColor: Colors.dark.card,
     paddingHorizontal: 6,
     fontSize: 12,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textSecondary,
   },
   input: {
     flex: 1,
-    color: Colors.dark.text,
     fontFamily: 'HindSiliguri_500Medium',
     fontSize: 16,
     paddingVertical: 14,
@@ -248,21 +236,17 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   mainButton: {
-    backgroundColor: Colors.dark.black,
     borderRadius: 28,
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: Colors.dark.neonGreen,
-    shadowColor: Colors.dark.neonGreen,
     shadowOpacity: 0.3,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 0 },
     elevation: 8,
   },
   mainButtonText: {
-    color: Colors.dark.neonGreen,
     fontFamily: 'HindSiliguri_700Bold',
     fontSize: 16,
     letterSpacing: 0.5,
@@ -274,12 +258,10 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   footerText: {
-    color: Colors.dark.textSecondary,
     fontFamily: 'HindSiliguri_400Regular',
     fontSize: 14,
   },
   footerLink: {
-    color: Colors.dark.neonOrange,
     fontFamily: 'HindSiliguri_600SemiBold',
     fontSize: 14,
   },

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ActivityIndicator, ViewStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 interface NeonButtonProps {
   title: string;
@@ -14,6 +14,8 @@ interface NeonButtonProps {
 }
 
 export function NeonButton({ title, onPress, variant = 'primary', loading, disabled, style, icon }: NeonButtonProps) {
+  const colors = useThemeColors();
+
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onPress();
@@ -21,23 +23,23 @@ export function NeonButton({ title, onPress, variant = 'primary', loading, disab
 
   const variantStyles = {
     primary: {
-      bg: Colors.dark.black,
-      text: Colors.dark.neonGreen,
-      border: Colors.dark.neonGreen,
+      bg: colors.black,
+      text: colors.neonGreen,
+      border: colors.neonGreen,
     },
     secondary: {
       bg: 'transparent',
-      text: Colors.dark.neonGreen,
-      border: Colors.dark.neonGreen,
+      text: colors.neonGreen,
+      border: colors.neonGreen,
     },
     danger: {
-      bg: Colors.dark.danger,
+      bg: colors.danger,
       text: '#fff',
-      border: Colors.dark.danger,
+      border: colors.danger,
     },
     ghost: {
       bg: 'transparent',
-      text: Colors.dark.textSecondary,
+      text: colors.textSecondary,
       border: 'transparent',
     },
   };
@@ -57,7 +59,7 @@ export function NeonButton({ title, onPress, variant = 'primary', loading, disab
           transform: [{ scale: pressed ? 0.97 : 1 }],
         },
         variant === 'secondary' && { borderWidth: 1.5 },
-        variant === 'primary' && { shadowColor: Colors.dark.neonGreen, shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 6 },
+        variant === 'primary' && { shadowColor: colors.neonGreen, shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 6 },
         style,
       ]}
     >

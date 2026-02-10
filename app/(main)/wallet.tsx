@@ -9,9 +9,10 @@ import { GlowCard } from '@/components/GlowCard';
 import { NeonButton } from '@/components/NeonButton';
 import { apiRequest } from '@/lib/query-client';
 import { queryClient } from '@/lib/query-client';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 export default function WalletScreen() {
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { user, refreshUser } = useAuth();
   const { t } = useLanguage();
@@ -70,43 +71,43 @@ export default function WalletScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.dark.primary} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
       <GlowCard style={styles.balanceCard}>
-        <View style={styles.balanceIcon}>
-          <Ionicons name="wallet" size={28} color={Colors.dark.primary} />
+        <View style={[styles.balanceIcon, { backgroundColor: colors.primaryDim }]}>
+          <Ionicons name="wallet" size={28} color={colors.primary} />
         </View>
-        <Text style={styles.balanceLabel}>{t('balance')}</Text>
-        <Text style={styles.balanceAmount}>{Number(user?.walletBalance || 0).toFixed(2)}</Text>
-        <Text style={styles.creditUnit}>{t('credits')}</Text>
+        <Text style={[styles.balanceLabel, { color: colors.textSecondary }]}>{t('balance')}</Text>
+        <Text style={[styles.balanceAmount, { color: colors.primary }]}>{Number(user?.walletBalance || 0).toFixed(2)}</Text>
+        <Text style={[styles.creditUnit, { color: colors.textMuted }]}>{t('credits')}</Text>
       </GlowCard>
 
       <GlowCard style={styles.transferCard}>
         <View style={styles.transferHeader}>
-          <Ionicons name="swap-horizontal" size={20} color={Colors.dark.primary} />
-          <Text style={styles.transferTitle}>{t('sendCredits')}</Text>
+          <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
+          <Text style={[styles.transferTitle, { color: colors.text }]}>{t('sendCredits')}</Text>
         </View>
 
-        <View style={styles.inputContainer}>
-          <Ionicons name="person-outline" size={18} color={Colors.dark.textMuted} style={styles.inputIcon} />
+        <View style={[styles.inputContainer, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}>
+          <Ionicons name="person-outline" size={18} color={colors.textMuted} style={styles.inputIcon} />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder={t('enterRecipientId')}
-            placeholderTextColor={Colors.dark.textMuted}
+            placeholderTextColor={colors.textMuted}
             value={recipientId}
             onChangeText={setRecipientId}
             autoCapitalize="characters"
           />
         </View>
 
-        <View style={styles.inputContainer}>
-          <Ionicons name="diamond-outline" size={18} color={Colors.dark.textMuted} style={styles.inputIcon} />
+        <View style={[styles.inputContainer, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}>
+          <Ionicons name="diamond-outline" size={18} color={colors.textMuted} style={styles.inputIcon} />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder={t('enterAmount')}
-            placeholderTextColor={Colors.dark.textMuted}
+            placeholderTextColor={colors.textMuted}
             value={amount}
             onChangeText={setAmount}
             keyboardType="decimal-pad"
@@ -116,11 +117,11 @@ export default function WalletScreen() {
         <NeonButton title={t('send')} onPress={handleTransfer} loading={transferMutation.isPending} />
       </GlowCard>
 
-      <Text style={styles.sectionTitle}>{t('transactionHistory')}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('transactionHistory')}</Text>
       {(!transactions || transactions.length === 0) ? (
         <GlowCard style={styles.emptyCard}>
-          <Ionicons name="receipt-outline" size={32} color={Colors.dark.textMuted} />
-          <Text style={styles.emptyText}>{t('noTransactions')}</Text>
+          <Ionicons name="receipt-outline" size={32} color={colors.textMuted} />
+          <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('noTransactions')}</Text>
         </GlowCard>
       ) : (
         <View style={styles.txList}>
@@ -129,14 +130,14 @@ export default function WalletScreen() {
             return (
               <GlowCard key={tx.id} style={styles.txItem}>
                 <View style={styles.txRow}>
-                  <View style={[styles.txIconWrap, { backgroundColor: isSent ? Colors.dark.dangerDim : Colors.dark.successDim }]}>
-                    <Ionicons name={isSent ? 'arrow-up' : 'arrow-down'} size={16} color={isSent ? Colors.dark.danger : Colors.dark.success} />
+                  <View style={[styles.txIconWrap, { backgroundColor: isSent ? colors.dangerDim : colors.successDim }]}>
+                    <Ionicons name={isSent ? 'arrow-up' : 'arrow-down'} size={16} color={isSent ? colors.danger : colors.success} />
                   </View>
                   <View style={styles.txInfo}>
-                    <Text style={styles.txDesc}>{tx.description || tx.type}</Text>
-                    <Text style={styles.txTime}>{new Date(tx.createdAt).toLocaleString()}</Text>
+                    <Text style={[styles.txDesc, { color: colors.text }]}>{tx.description || tx.type}</Text>
+                    <Text style={[styles.txTime, { color: colors.textMuted }]}>{new Date(tx.createdAt).toLocaleString()}</Text>
                   </View>
-                  <Text style={[styles.txAmount, { color: isSent ? Colors.dark.danger : Colors.dark.success }]}>
+                  <Text style={[styles.txAmount, { color: isSent ? colors.danger : colors.success }]}>
                     {isSent ? '-' : '+'}{Number(tx.amount).toFixed(2)}
                   </Text>
                 </View>
@@ -152,7 +153,6 @@ export default function WalletScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
     paddingHorizontal: 16,
   },
   balanceCard: {
@@ -165,7 +165,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: Colors.dark.primaryDim,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -173,20 +172,17 @@ const styles = StyleSheet.create({
   balanceLabel: {
     fontSize: 13,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 2,
   },
   balanceAmount: {
     fontSize: 48,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
     marginTop: 4,
   },
   creditUnit: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textMuted,
     letterSpacing: 1,
   },
   transferCard: {
@@ -203,15 +199,12 @@ const styles = StyleSheet.create({
   transferTitle: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.dark.inputBg,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: Colors.dark.inputBorder,
     paddingHorizontal: 12,
   },
   inputIcon: {
@@ -219,7 +212,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: Colors.dark.text,
     fontFamily: 'HindSiliguri_500Medium',
     fontSize: 14,
     paddingVertical: 12,
@@ -227,7 +219,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
     marginBottom: 12,
     letterSpacing: 0.5,
   },
@@ -239,7 +230,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   txList: {
     gap: 8,
@@ -265,12 +255,10 @@ const styles = StyleSheet.create({
   txDesc: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.text,
   },
   txTime: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   txAmount: {
     fontSize: 16,

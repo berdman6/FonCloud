@@ -4,10 +4,11 @@ import { router } from 'expo-router';
 import { useAuth } from '@/lib/auth-context';
 import { PortalAnimation } from '@/components/PortalAnimation';
 import { FloatingBackground } from '@/components/FloatingBackground';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 export default function IndexScreen() {
   const { isAuthenticated, isLoading } = useAuth();
+  const colors = useThemeColors();
 
   useEffect(() => {
     if (!isLoading) {
@@ -23,11 +24,11 @@ export default function IndexScreen() {
   }, [isLoading, isAuthenticated]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FloatingBackground />
       <PortalAnimation size={220} />
-      <Text style={styles.title}>FonCloud</Text>
-      <ActivityIndicator color={Colors.dark.neonGreen} size="small" style={{ marginTop: 24 }} />
+      <Text style={[styles.title, { color: colors.neonGreen, textShadowColor: 'rgba(57, 255, 20, 0.5)' }]}>FonCloud</Text>
+      <ActivityIndicator color={colors.neonGreen} size="small" style={{ marginTop: 24 }} />
     </View>
   );
 }
@@ -35,17 +36,14 @@ export default function IndexScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
   title: {
     fontSize: 32,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.neonGreen,
     marginTop: 24,
     letterSpacing: 3,
-    textShadowColor: 'rgba(57, 255, 20, 0.5)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 15,
   },

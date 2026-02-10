@@ -8,7 +8,7 @@ import { useLanguage } from '@/lib/i18n';
 import { GlowCard } from '@/components/GlowCard';
 import { NeonButton } from '@/components/NeonButton';
 import { apiRequest, queryClient } from '@/lib/query-client';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 const METHODS = [
   { id: 'bkash', label: 'bKash', icon: 'phone-portrait-outline' },
@@ -17,6 +17,7 @@ const METHODS = [
 ];
 
 export default function WithdrawalsScreen() {
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { user, refreshUser } = useAuth();
   const { t } = useLanguage();
@@ -80,9 +81,9 @@ export default function WithdrawalsScreen() {
 
   const statusColor = (status: string) => {
     switch (status) {
-      case 'success': return Colors.dark.success;
-      case 'failed': return Colors.dark.danger;
-      default: return Colors.dark.warning;
+      case 'success': return colors.success;
+      case 'failed': return colors.danger;
+      default: return colors.warning;
     }
   };
 
@@ -96,53 +97,57 @@ export default function WithdrawalsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.dark.primary} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
       <GlowCard style={styles.formCard}>
         <View style={styles.formHeader}>
-          <Ionicons name="arrow-down-circle" size={22} color={Colors.dark.primary} />
-          <Text style={styles.formTitle}>{t('requestWithdraw')}</Text>
+          <Ionicons name="arrow-down-circle" size={22} color={colors.primary} />
+          <Text style={[styles.formTitle, { color: colors.text }]}>{t('requestWithdraw')}</Text>
         </View>
 
-        <View style={styles.balanceRow}>
-          <Text style={styles.balanceLabel}>{t('balance')}:</Text>
-          <Text style={styles.balanceValue}>{Number(user?.walletBalance || 0).toFixed(2)} {t('credits')}</Text>
+        <View style={[styles.balanceRow, { backgroundColor: colors.primaryDim }]}>
+          <Text style={[styles.balanceLabel, { color: colors.textSecondary }]}>{t('balance')}:</Text>
+          <Text style={[styles.balanceValue, { color: colors.primary }]}>{Number(user?.walletBalance || 0).toFixed(2)} {t('credits')}</Text>
         </View>
 
-        <Text style={styles.fieldLabel}>{t('method')}</Text>
+        <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('method')}</Text>
         <View style={styles.methodRow}>
           {METHODS.map((m) => (
             <Pressable
               key={m.id}
               onPress={() => setMethod(m.id)}
-              style={[styles.methodBtn, method === m.id && styles.methodBtnSelected]}
+              style={[
+                styles.methodBtn,
+                { borderColor: colors.cardBorder, backgroundColor: colors.card },
+                method === m.id && { borderColor: colors.primary, backgroundColor: colors.primaryDim },
+              ]}
             >
-              <Ionicons name={m.icon as any} size={18} color={method === m.id ? Colors.dark.primary : Colors.dark.textSecondary} />
-              <Text style={[styles.methodLabel, method === m.id && { color: Colors.dark.primary }]}>{m.label}</Text>
+              <Ionicons name={m.icon as any} size={18} color={method === m.id ? colors.primary : colors.textSecondary} />
+              <Text style={[styles.methodLabel, { color: colors.textSecondary }, method === m.id && { color: colors.primary }]}>{m.label}</Text>
             </Pressable>
           ))}
         </View>
 
-        <View style={styles.inputContainer}>
-          <Ionicons name="diamond-outline" size={18} color={Colors.dark.textMuted} style={{ marginRight: 8 }} />
+        <View style={[styles.inputContainer, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}>
+          <Ionicons name="diamond-outline" size={18} color={colors.textMuted} style={{ marginRight: 8 }} />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder={t('withdrawAmount')}
-            placeholderTextColor={Colors.dark.textMuted}
+            placeholderTextColor={colors.textMuted}
             value={amount}
             onChangeText={setAmount}
             keyboardType="decimal-pad"
           />
         </View>
 
-        <View style={styles.inputContainer}>
-          <Ionicons name="card-outline" size={18} color={Colors.dark.textMuted} style={{ marginRight: 8 }} />
+        <View style={[styles.inputContainer, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }]}>
+          <Ionicons name="card-outline" size={18} color={colors.textMuted} style={{ marginRight: 8 }} />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder={t('enterAccountDetails')}
-            placeholderTextColor={Colors.dark.textMuted}
+            placeholderTextColor={colors.textMuted}
             value={accountDetails}
             onChangeText={setAccountDetails}
           />
@@ -151,11 +156,11 @@ export default function WithdrawalsScreen() {
         <NeonButton title={t('submit')} onPress={handleWithdraw} loading={withdrawMutation.isPending} />
       </GlowCard>
 
-      <Text style={styles.sectionTitle}>{t('history')}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('history')}</Text>
       {(!withdrawals || withdrawals.length === 0) ? (
         <GlowCard style={styles.emptyCard}>
-          <Ionicons name="receipt-outline" size={32} color={Colors.dark.textMuted} />
-          <Text style={styles.emptyText}>{t('noWithdrawals')}</Text>
+          <Ionicons name="receipt-outline" size={32} color={colors.textMuted} />
+          <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('noWithdrawals')}</Text>
         </GlowCard>
       ) : (
         <View style={styles.historyList}>
@@ -166,9 +171,9 @@ export default function WithdrawalsScreen() {
                   <Ionicons name={statusIcon(w.status) as any} size={18} color={statusColor(w.status)} />
                 </View>
                 <View style={styles.historyInfo}>
-                  <Text style={styles.historyAmount}>{Number(w.amount).toFixed(2)} {t('credits')}</Text>
-                  <Text style={styles.historyMethod}>{w.method} - {w.accountDetails}</Text>
-                  <Text style={styles.historyDate}>{new Date(w.createdAt).toLocaleDateString()}</Text>
+                  <Text style={[styles.historyAmount, { color: colors.text }]}>{Number(w.amount).toFixed(2)} {t('credits')}</Text>
+                  <Text style={[styles.historyMethod, { color: colors.textMuted }]}>{w.method} - {w.accountDetails}</Text>
+                  <Text style={[styles.historyDate, { color: colors.textMuted }]}>{new Date(w.createdAt).toLocaleDateString()}</Text>
                 </View>
                 <View style={[styles.statusBadge, { backgroundColor: statusColor(w.status) + '22', borderColor: statusColor(w.status) + '44' }]}>
                   <Text style={[styles.statusText, { color: statusColor(w.status) }]}>{t(w.status)}</Text>
@@ -185,7 +190,6 @@ export default function WithdrawalsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
     paddingHorizontal: 16,
   },
   formCard: {
@@ -203,13 +207,11 @@ const styles = StyleSheet.create({
   formTitle: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   balanceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: Colors.dark.primaryDim,
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 10,
@@ -217,17 +219,14 @@ const styles = StyleSheet.create({
   balanceLabel: {
     fontSize: 13,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textSecondary,
   },
   balanceValue: {
     fontSize: 15,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
   },
   fieldLabel: {
     fontSize: 13,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textSecondary,
   },
   methodRow: {
     flexDirection: 'row',
@@ -242,30 +241,20 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
-    backgroundColor: Colors.dark.card,
-  },
-  methodBtnSelected: {
-    borderColor: Colors.dark.primary,
-    backgroundColor: Colors.dark.primaryDim,
   },
   methodLabel: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textSecondary,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.dark.inputBg,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: Colors.dark.inputBorder,
     paddingHorizontal: 12,
   },
   input: {
     flex: 1,
-    color: Colors.dark.text,
     fontFamily: 'HindSiliguri_500Medium',
     fontSize: 14,
     paddingVertical: 12,
@@ -273,7 +262,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
     marginBottom: 12,
     letterSpacing: 0.5,
   },
@@ -285,7 +273,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   historyList: {
     gap: 8,
@@ -311,17 +298,14 @@ const styles = StyleSheet.create({
   historyAmount: {
     fontSize: 15,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   historyMethod: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   historyDate: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   statusBadge: {
     paddingHorizontal: 10,

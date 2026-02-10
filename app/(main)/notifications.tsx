@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNotifications, AppNotification } from '@/lib/notifications-context';
 import { useLanguage } from '@/lib/i18n';
 import { GlowCard } from '@/components/GlowCard';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 function timeAgo(date: Date): string {
   const diff = Date.now() - new Date(date).getTime();
@@ -20,27 +20,42 @@ function timeAgo(date: Date): string {
 }
 
 function NotificationItem({ item, onPress }: { item: AppNotification; onPress: (id: string) => void }) {
+  const colors = useThemeColors();
   return (
     <Pressable
       onPress={() => onPress(item.id)}
-      style={[styles.notifItem, !item.isRead && styles.notifItemUnread]}
+      style={[
+        styles.notifItem,
+        { backgroundColor: colors.card },
+        !item.isRead && { backgroundColor: colors.primaryDim, borderWidth: 1, borderColor: colors.cardBorder },
+      ]}
     >
       <View style={[styles.notifIconWrap, { backgroundColor: item.iconColor + '1A' }]}>
         <Ionicons name={item.icon as any} size={20} color={item.iconColor} />
       </View>
       <View style={styles.notifContent}>
         <View style={styles.notifTitleRow}>
-          <Text style={[styles.notifTitle, !item.isRead && styles.notifTitleUnread]} numberOfLines={1}>{item.title}</Text>
-          <Text style={styles.notifTime}>{timeAgo(item.createdAt)}</Text>
+          <Text
+            style={[
+              styles.notifTitle,
+              { color: colors.textSecondary },
+              !item.isRead && { fontFamily: 'HindSiliguri_600SemiBold', color: colors.text },
+            ]}
+            numberOfLines={1}
+          >
+            {item.title}
+          </Text>
+          <Text style={[styles.notifTime, { color: colors.textMuted }]}>{timeAgo(item.createdAt)}</Text>
         </View>
-        <Text style={styles.notifMessage} numberOfLines={2}>{item.message}</Text>
+        <Text style={[styles.notifMessage, { color: colors.textMuted }]} numberOfLines={2}>{item.message}</Text>
       </View>
-      {!item.isRead && <View style={styles.notifDot} />}
+      {!item.isRead && <View style={[styles.notifDot, { backgroundColor: colors.primary }]} />}
     </Pressable>
   );
 }
 
 export default function NotificationsScreen() {
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
@@ -50,22 +65,22 @@ export default function NotificationsScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <GlowCard style={styles.headerCard}>
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
-            <Ionicons name="notifications" size={22} color={Colors.dark.primary} />
-            <Text style={styles.headerTitle}>{t('allNotifications')}</Text>
+            <Ionicons name="notifications" size={22} color={colors.primary} />
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('allNotifications')}</Text>
           </View>
           <View style={styles.headerRight}>
             {unreadCount > 0 && (
-              <View style={styles.countBadge}>
+              <View style={[styles.countBadge, { backgroundColor: colors.danger }]}>
                 <Text style={styles.countBadgeText}>{unreadCount}</Text>
               </View>
             )}
             {unreadCount > 0 && (
               <Pressable onPress={markAllAsRead} hitSlop={8} style={styles.markAllBtn}>
-                <Ionicons name="checkmark-done" size={22} color={Colors.dark.primary} />
+                <Ionicons name="checkmark-done" size={22} color={colors.primary} />
               </Pressable>
             )}
           </View>
@@ -74,8 +89,8 @@ export default function NotificationsScreen() {
 
       {notifications.length === 0 ? (
         <View style={styles.emptyState}>
-          <Ionicons name="notifications-off-outline" size={56} color={Colors.dark.textMuted} />
-          <Text style={styles.emptyText}>{t('noNotifications')}</Text>
+          <Ionicons name="notifications-off-outline" size={56} color={colors.textMuted} />
+          <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('noNotifications')}</Text>
         </View>
       ) : (
         <FlatList
@@ -96,7 +111,6 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
   },
   headerCard: {
     marginHorizontal: 16,
@@ -117,7 +131,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   headerRight: {
     flexDirection: 'row',
@@ -125,7 +138,6 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   countBadge: {
-    backgroundColor: Colors.dark.danger,
     borderRadius: 10,
     minWidth: 22,
     height: 22,
@@ -154,20 +166,13 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 15,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textMuted,
   },
   notifItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.dark.card,
     borderRadius: 14,
     padding: 14,
     gap: 12,
-  },
-  notifItemUnread: {
-    backgroundColor: 'rgba(57, 255, 20, 0.06)',
-    borderWidth: 1,
-    borderColor: 'rgba(57, 255, 20, 0.12)',
   },
   notifIconWrap: {
     width: 42,
@@ -188,30 +193,22 @@ const styles = StyleSheet.create({
   notifTitle: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textSecondary,
     flex: 1,
     marginRight: 8,
-  },
-  notifTitleUnread: {
-    fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   notifTime: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   notifMessage: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
     lineHeight: 17,
   },
   notifDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: Colors.dark.primary,
   },
   separator: {
     height: 8,

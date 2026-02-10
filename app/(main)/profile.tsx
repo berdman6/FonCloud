@@ -8,9 +8,10 @@ import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { GlowCard } from '@/components/GlowCard';
 import { PortalAnimation } from '@/components/PortalAnimation';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 export default function ProfileScreen() {
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -46,99 +47,99 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }}
     >
       <View style={styles.profileHeader}>
         <PortalAnimation size={100} />
-        <View style={styles.avatarOverlay}>
-          <Text style={styles.avatarLetter}>{user?.displayName?.charAt(0)?.toUpperCase() || 'F'}</Text>
+        <View style={[styles.avatarOverlay, { backgroundColor: colors.primaryDim, borderColor: colors.primary }]}>
+          <Text style={[styles.avatarLetter, { color: colors.primary }]}>{user?.displayName?.charAt(0)?.toUpperCase() || 'F'}</Text>
         </View>
-        <Text style={styles.displayName}>{user?.displayName || 'User'}</Text>
-        <Text style={styles.username}>@{user?.username || 'user'}</Text>
+        <Text style={[styles.displayName, { color: colors.text }]}>{user?.displayName || 'User'}</Text>
+        <Text style={[styles.username, { color: colors.textMuted }]}>@{user?.username || 'user'}</Text>
       </View>
 
       <GlowCard style={styles.infoCard}>
         <View style={styles.infoRow}>
-          <View style={styles.infoIcon}>
-            <Ionicons name="finger-print" size={18} color={Colors.dark.primary} />
+          <View style={[styles.infoIcon, { backgroundColor: colors.primaryDim }]}>
+            <Ionicons name="finger-print" size={18} color={colors.primary} />
           </View>
           <View style={styles.infoContent}>
-            <Text style={styles.infoLabel}>{t('userId')}</Text>
-            <Text style={styles.infoValue}>{user?.userId || '---'}</Text>
+            <Text style={[styles.infoLabel, { color: colors.textMuted }]}>{t('userId')}</Text>
+            <Text style={[styles.infoValue, { color: colors.text }]}>{user?.userId || '---'}</Text>
           </View>
         </View>
-        <View style={styles.infoDivider} />
+        <View style={[styles.infoDivider, { backgroundColor: colors.divider }]} />
         <View style={styles.infoRow}>
-          <View style={styles.infoIcon}>
-            <Ionicons name="calendar-outline" size={18} color={Colors.dark.primary} />
+          <View style={[styles.infoIcon, { backgroundColor: colors.primaryDim }]}>
+            <Ionicons name="calendar-outline" size={18} color={colors.primary} />
           </View>
           <View style={styles.infoContent}>
-            <Text style={styles.infoLabel}>{t('memberSince')}</Text>
-            <Text style={styles.infoValue}>{memberSince}</Text>
+            <Text style={[styles.infoLabel, { color: colors.textMuted }]}>{t('memberSince')}</Text>
+            <Text style={[styles.infoValue, { color: colors.text }]}>{memberSince}</Text>
           </View>
         </View>
       </GlowCard>
 
       <View style={styles.statsGrid}>
         <GlowCard style={styles.statCard}>
-          <Ionicons name="wallet" size={24} color={Colors.dark.primary} />
-          <Text style={styles.statValue}>{Number(user?.walletBalance || 0).toFixed(2)}</Text>
-          <Text style={styles.statLabel}>{t('balance')}</Text>
+          <Ionicons name="wallet" size={24} color={colors.primary} />
+          <Text style={[styles.statValue, { color: colors.text }]}>{Number(user?.walletBalance || 0).toFixed(2)}</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('balance')}</Text>
         </GlowCard>
         <GlowCard style={styles.statCard}>
-          <Ionicons name="trending-up" size={24} color={Colors.dark.success} />
-          <Text style={styles.statValue}>{Number(user?.totalEarnings || 0).toFixed(2)}</Text>
-          <Text style={styles.statLabel}>{t('totalEarned')}</Text>
+          <Ionicons name="trending-up" size={24} color={colors.success} />
+          <Text style={[styles.statValue, { color: colors.text }]}>{Number(user?.totalEarnings || 0).toFixed(2)}</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('totalEarned')}</Text>
         </GlowCard>
         <GlowCard style={styles.statCard}>
-          <Ionicons name="people" size={24} color={Colors.dark.accent} />
-          <Text style={styles.statValue}>{user?.totalReferrals || 0}</Text>
-          <Text style={styles.statLabel}>{t('totalReferralsLabel')}</Text>
+          <Ionicons name="people" size={24} color={colors.accent} />
+          <Text style={[styles.statValue, { color: colors.text }]}>{user?.totalReferrals || 0}</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('totalReferralsLabel')}</Text>
         </GlowCard>
       </View>
 
       <GlowCard style={styles.referralCard}>
         <View style={styles.referralHeader}>
-          <Ionicons name="gift" size={20} color={Colors.dark.primary} />
-          <Text style={styles.referralTitle}>{t('referralCodeLabel')}</Text>
+          <Ionicons name="gift" size={20} color={colors.primary} />
+          <Text style={[styles.referralTitle, { color: colors.textSecondary }]}>{t('referralCodeLabel')}</Text>
         </View>
-        <View style={styles.codeBox}>
-          <Text style={styles.codeText}>{user?.referralCode || '---'}</Text>
+        <View style={[styles.codeBox, { backgroundColor: colors.primaryDim, borderColor: colors.primary }]}>
+          <Text style={[styles.codeText, { color: colors.primary }]}>{user?.referralCode || '---'}</Text>
           <Pressable
             onPress={() => copyToClipboard(user?.referralCode || '')}
             style={({ pressed }) => [styles.copyBtn, pressed && { opacity: 0.7 }]}
           >
-            <Ionicons name="copy-outline" size={18} color={Colors.dark.primary} />
+            <Ionicons name="copy-outline" size={18} color={colors.primary} />
           </Pressable>
           <Pressable
             onPress={handleShareLink}
             style={({ pressed }) => [styles.copyBtn, pressed && { opacity: 0.7 }]}
           >
-            <Ionicons name="share-social-outline" size={18} color={Colors.dark.accent} />
+            <Ionicons name="share-social-outline" size={18} color={colors.accent} />
           </Pressable>
         </View>
-        <Text style={styles.shareHint}>{t('shareCode')}</Text>
+        <Text style={[styles.shareHint, { color: colors.textMuted }]}>{t('shareCode')}</Text>
       </GlowCard>
 
       <GlowCard style={styles.commissionCard}>
-        <Text style={styles.commissionTitle}>Commission Structure</Text>
+        <Text style={[styles.commissionTitle, { color: colors.text }]}>Commission Structure</Text>
         <View style={styles.levelRow}>
-          <View style={styles.levelItem}>
-            <Text style={styles.levelLabel}>L1</Text>
-            <Text style={styles.levelRate}>10%</Text>
+          <View style={[styles.levelItem, { backgroundColor: colors.primaryDim }]}>
+            <Text style={[styles.levelLabel, { color: colors.textMuted }]}>L1</Text>
+            <Text style={[styles.levelRate, { color: colors.primary }]}>10%</Text>
           </View>
-          <View style={styles.levelItem}>
-            <Text style={styles.levelLabel}>L2</Text>
-            <Text style={styles.levelRate}>5%</Text>
+          <View style={[styles.levelItem, { backgroundColor: colors.primaryDim }]}>
+            <Text style={[styles.levelLabel, { color: colors.textMuted }]}>L2</Text>
+            <Text style={[styles.levelRate, { color: colors.primary }]}>5%</Text>
           </View>
-          <View style={styles.levelItem}>
-            <Text style={styles.levelLabel}>L3</Text>
-            <Text style={styles.levelRate}>2%</Text>
+          <View style={[styles.levelItem, { backgroundColor: colors.primaryDim }]}>
+            <Text style={[styles.levelLabel, { color: colors.textMuted }]}>L3</Text>
+            <Text style={[styles.levelRate, { color: colors.primary }]}>2%</Text>
           </View>
-          <View style={styles.levelItem}>
-            <Text style={styles.levelLabel}>L4</Text>
-            <Text style={styles.levelRate}>1%</Text>
+          <View style={[styles.levelItem, { backgroundColor: colors.primaryDim }]}>
+            <Text style={[styles.levelLabel, { color: colors.textMuted }]}>L4</Text>
+            <Text style={[styles.levelRate, { color: colors.primary }]}>1%</Text>
           </View>
         </View>
       </GlowCard>
@@ -149,7 +150,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
     paddingHorizontal: 16,
   },
   profileHeader: {
@@ -160,9 +160,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: Colors.dark.primaryDim,
     borderWidth: 2,
-    borderColor: Colors.dark.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: -24,
@@ -170,18 +168,15 @@ const styles = StyleSheet.create({
   avatarLetter: {
     fontSize: 22,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
   },
   displayName: {
     fontSize: 24,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.text,
     marginTop: 8,
   },
   username: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   infoCard: {
     padding: 16,
@@ -197,7 +192,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.dark.primaryDim,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -207,16 +201,13 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   infoValue: {
     fontSize: 15,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   infoDivider: {
     height: 1,
-    backgroundColor: Colors.dark.divider,
     marginLeft: 48,
   },
   statsGrid: {
@@ -233,12 +224,10 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.text,
   },
   statLabel: {
     fontSize: 10,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
     textAlign: 'center',
   },
   referralCard: {
@@ -255,23 +244,19 @@ const styles = StyleSheet.create({
   referralTitle: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textSecondary,
   },
   codeBox: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: Colors.dark.primaryDim,
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: Colors.dark.primary,
   },
   codeText: {
     fontSize: 28,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
     letterSpacing: 4,
   },
   copyBtn: {
@@ -280,7 +265,6 @@ const styles = StyleSheet.create({
   shareHint: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   commissionCard: {
     padding: 20,
@@ -290,7 +274,6 @@ const styles = StyleSheet.create({
   commissionTitle: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
     letterSpacing: 0.5,
   },
   levelRow: {
@@ -302,18 +285,15 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     gap: 4,
-    backgroundColor: Colors.dark.primaryDim,
     paddingVertical: 12,
     borderRadius: 10,
   },
   levelLabel: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.textMuted,
   },
   levelRate: {
     fontSize: 20,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
   },
 });

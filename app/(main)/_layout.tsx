@@ -16,7 +16,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { useNotifications } from '@/lib/notifications-context';
 import { FloatingBackground } from '@/components/FloatingBackground';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -30,6 +30,7 @@ interface TabItemProps {
 }
 
 function TabItem({ icon, iconSet = 'ionicons', label, active, badge, onPress }: TabItemProps) {
+  const colors = useThemeColors();
   const scale = useSharedValue(1);
   const translateY = useSharedValue(0);
 
@@ -49,21 +50,21 @@ function TabItem({ icon, iconSet = 'ionicons', label, active, badge, onPress }: 
     transform: [{ scale: scale.value }, { translateY: translateY.value }],
   }));
 
-  const iconColor = active ? Colors.dark.primary : Colors.dark.tabIconDefault;
+  const iconColor = active ? colors.primary : colors.tabIconDefault;
   const IconComponent = iconSet === 'material' ? MaterialCommunityIcons : Ionicons;
 
   return (
     <Pressable onPress={handlePress} style={styles.tabItem}>
       <Animated.View style={[styles.tabIconWrap, iconAnimStyle]}>
-        {active && <View style={styles.tabActiveIndicator} />}
+        {active && <View style={[styles.tabActiveIndicator, { backgroundColor: colors.primary }]} />}
         <IconComponent name={icon as any} size={24} color={iconColor} />
         {badge !== undefined && badge > 0 && (
-          <View style={styles.tabBadge}>
+          <View style={[styles.tabBadge, { backgroundColor: colors.danger }]}>
             <Text style={styles.tabBadgeText}>{badge > 9 ? '9+' : badge}</Text>
           </View>
         )}
       </Animated.View>
-      <Text style={[styles.tabLabel, active && styles.tabLabelActive]} numberOfLines={1}>
+      <Text style={[styles.tabLabel, { color: colors.tabIconDefault }, active && { color: colors.primary, fontFamily: 'HindSiliguri_600SemiBold' }]} numberOfLines={1}>
         {label}
       </Text>
     </Pressable>
@@ -80,15 +81,16 @@ interface MoreSheetItemProps {
 }
 
 function MoreSheetItem({ icon, label, onPress, color, badge, right }: MoreSheetItemProps) {
+  const colors = useThemeColors();
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.moreItem, pressed && { backgroundColor: Colors.dark.primaryDim }]}
+      style={({ pressed }) => [styles.moreItem, pressed && { backgroundColor: colors.primaryDim }]}
     >
-      <Ionicons name={icon as any} size={22} color={color || Colors.dark.textSecondary} />
-      <Text style={[styles.moreItemText, color ? { color } : null]}>{label}</Text>
+      <Ionicons name={icon as any} size={22} color={color || colors.textSecondary} />
+      <Text style={[styles.moreItemText, { color: colors.text }, color ? { color } : null]}>{label}</Text>
       {badge !== undefined && badge > 0 && (
-        <View style={styles.moreBadge}>
+        <View style={[styles.moreBadge, { backgroundColor: colors.danger }]}>
           <Text style={styles.moreBadgeText}>{badge > 9 ? '9+' : badge}</Text>
         </View>
       )}
@@ -98,6 +100,7 @@ function MoreSheetItem({ icon, label, onPress, color, badge, right }: MoreSheetI
 }
 
 export default function MainLayout() {
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
   const { user, logout } = useAuth();
@@ -124,26 +127,26 @@ export default function MainLayout() {
   const tabBarHeight = 60 + bottomPad;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FloatingBackground />
       <Stack
         screenOptions={{
           headerShown: true,
-          headerStyle: { backgroundColor: Colors.dark.background },
-          headerTintColor: Colors.dark.neonGreen,
-          headerTitleStyle: { fontFamily: 'HindSiliguri_600SemiBold', fontSize: 18, color: Colors.dark.neonGreen },
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.neonGreen,
+          headerTitleStyle: { fontFamily: 'HindSiliguri_600SemiBold', fontSize: 18, color: colors.neonGreen },
           headerLeft: () => null,
           headerRight: () => (
             <Pressable onPress={() => navigateTo('/(main)/notifications')} style={styles.bellBtn}>
-              <Ionicons name="notifications-outline" size={22} color={Colors.dark.primary} />
+              <Ionicons name="notifications-outline" size={22} color={colors.primary} />
               {unreadCount > 0 && (
-                <View style={styles.bellBadge}>
+                <View style={[styles.bellBadge, { backgroundColor: colors.danger }]}>
                   <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
                 </View>
               )}
             </Pressable>
           ),
-          contentStyle: { backgroundColor: Colors.dark.background },
+          contentStyle: { backgroundColor: colors.background },
           headerShadowVisible: false,
         }}
       >
@@ -157,7 +160,7 @@ export default function MainLayout() {
         <Stack.Screen name="notifications" options={{ title: t('notifications') }} />
       </Stack>
 
-      <View style={[styles.tabBar, { height: tabBarHeight, paddingBottom: bottomPad }]}>
+      <View style={[styles.tabBar, { height: tabBarHeight, paddingBottom: bottomPad, backgroundColor: colors.surface, borderTopColor: colors.divider }]}>
         <TabItem
           icon={isActive('home') ? 'home' : 'home-outline'}
           label={t('home')}
@@ -200,22 +203,22 @@ export default function MainLayout() {
       >
         <Pressable style={styles.moreOverlay} onPress={() => setMoreOpen(false)}>
           <Pressable
-            style={[styles.moreSheet, { paddingBottom: bottomPad + 12 }]}
+            style={[styles.moreSheet, { paddingBottom: bottomPad + 12, backgroundColor: colors.surface }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={styles.moreHandle} />
+            <View style={[styles.moreHandle, { backgroundColor: colors.divider }]} />
 
             <View style={styles.moreProfileRow}>
-              <View style={styles.moreAvatar}>
+              <View style={[styles.moreAvatar, { backgroundColor: colors.primary }]}>
                 <Text style={styles.moreAvatarText}>{user?.displayName?.charAt(0)?.toUpperCase() || 'F'}</Text>
               </View>
               <View style={styles.moreProfileInfo}>
-                <Text style={styles.moreProfileName}>{user?.displayName || 'User'}</Text>
-                <Text style={styles.moreProfileId}>ID: {user?.userId || '---'}</Text>
+                <Text style={[styles.moreProfileName, { color: colors.text }]}>{user?.displayName || 'User'}</Text>
+                <Text style={[styles.moreProfileId, { color: colors.textSecondary }]}>ID: {user?.userId || '---'}</Text>
               </View>
             </View>
 
-            <View style={styles.moreDivider} />
+            <View style={[styles.moreDivider, { backgroundColor: colors.divider }]} />
 
             <MoreSheetItem
               icon="arrow-down-circle-outline"
@@ -239,15 +242,15 @@ export default function MainLayout() {
               badge={unreadCount}
             />
 
-            <View style={styles.moreDivider} />
+            <View style={[styles.moreDivider, { backgroundColor: colors.divider }]} />
 
             <MoreSheetItem
               icon="language"
               label={t('switchLanguage')}
               onPress={() => { toggleLanguage(); setMoreOpen(false); }}
               right={
-                <View style={styles.langChip}>
-                  <Text style={styles.langChipText}>{currentLanguage.toUpperCase()}</Text>
+                <View style={[styles.langChip, { backgroundColor: colors.primaryDim }]}>
+                  <Text style={[styles.langChipText, { color: colors.primary }]}>{currentLanguage.toUpperCase()}</Text>
                 </View>
               }
             />
@@ -260,7 +263,7 @@ export default function MainLayout() {
               icon="log-out-outline"
               label={t('logout')}
               onPress={handleLogout}
-              color={Colors.dark.danger}
+              color={colors.danger}
             />
           </Pressable>
         </Pressable>
@@ -272,7 +275,6 @@ export default function MainLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
   },
   bellBtn: {
     width: 40,
@@ -285,7 +287,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     right: 2,
-    backgroundColor: Colors.dark.danger,
     borderRadius: 9,
     minWidth: 18,
     height: 18,
@@ -300,9 +301,7 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: Colors.dark.surface,
     borderTopWidth: 1,
-    borderTopColor: Colors.dark.divider,
     alignItems: 'flex-start',
     paddingTop: 6,
     shadowColor: '#000',
@@ -329,13 +328,11 @@ const styles = StyleSheet.create({
     width: 20,
     height: 3,
     borderRadius: 2,
-    backgroundColor: Colors.dark.primary,
   },
   tabBadge: {
     position: 'absolute',
     top: -2,
     right: -6,
-    backgroundColor: Colors.dark.danger,
     borderRadius: 8,
     minWidth: 16,
     height: 16,
@@ -351,11 +348,6 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 10,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.tabIconDefault,
-  },
-  tabLabelActive: {
-    color: Colors.dark.primary,
-    fontFamily: 'HindSiliguri_600SemiBold',
   },
   moreOverlay: {
     flex: 1,
@@ -363,7 +355,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   moreSheet: {
-    backgroundColor: Colors.dark.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: 8,
@@ -372,7 +363,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 4,
     borderRadius: 2,
-    backgroundColor: Colors.dark.divider,
     alignSelf: 'center',
     marginBottom: 12,
   },
@@ -387,7 +377,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.dark.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -402,16 +391,13 @@ const styles = StyleSheet.create({
   moreProfileName: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   moreProfileId: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textSecondary,
   },
   moreDivider: {
     height: 1,
-    backgroundColor: Colors.dark.divider,
     marginHorizontal: 16,
     marginVertical: 6,
   },
@@ -427,11 +413,9 @@ const styles = StyleSheet.create({
   moreItemText: {
     fontSize: 15,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.text,
     flex: 1,
   },
   moreBadge: {
-    backgroundColor: Colors.dark.danger,
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -445,7 +429,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   langChip: {
-    backgroundColor: Colors.dark.primaryDim,
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 10,
@@ -453,6 +436,5 @@ const styles = StyleSheet.create({
   langChipText: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.primary,
   },
 });

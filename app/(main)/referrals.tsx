@@ -8,9 +8,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { GlowCard } from '@/components/GlowCard';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 export default function ReferralsScreen() {
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -63,91 +64,91 @@ export default function ReferralsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.dark.primary} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
       <View style={styles.statsRow}>
         <GlowCard style={styles.statCard}>
-          <View style={styles.statIcon}>
-            <Ionicons name="people" size={22} color={Colors.dark.primary} />
+          <View style={[styles.statIcon, { backgroundColor: colors.primaryDim }]}>
+            <Ionicons name="people" size={22} color={colors.primary} />
           </View>
-          <Text style={styles.statValue}>{user?.totalReferrals || 0}</Text>
-          <Text style={styles.statLabel}>{t('directReferrals')}</Text>
+          <Text style={[styles.statValue, { color: colors.text }]}>{user?.totalReferrals || 0}</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('directReferrals')}</Text>
         </GlowCard>
         <GlowCard style={styles.statCard}>
-          <View style={styles.statIcon}>
-            <Ionicons name="diamond" size={22} color={Colors.dark.accent} />
+          <View style={[styles.statIcon, { backgroundColor: colors.primaryDim }]}>
+            <Ionicons name="diamond" size={22} color={colors.accent} />
           </View>
-          <Text style={styles.statValue}>{totalComm.toFixed(2)}</Text>
-          <Text style={styles.statLabel}>{t('totalCommissions')}</Text>
+          <Text style={[styles.statValue, { color: colors.text }]}>{totalComm.toFixed(2)}</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('totalCommissions')}</Text>
         </GlowCard>
       </View>
 
       <GlowCard style={styles.codeCard}>
         <View style={styles.codeRow}>
-          <Ionicons name="gift" size={20} color={Colors.dark.primary} />
-          <Text style={styles.codeLabel}>{t('referralCodeLabel')}</Text>
+          <Ionicons name="gift" size={20} color={colors.primary} />
+          <Text style={[styles.codeLabel, { color: colors.textSecondary }]}>{t('referralCodeLabel')}</Text>
         </View>
-        <Text style={styles.codeValue}>{user?.referralCode || '---'}</Text>
-        <Text style={styles.codeHint}>{t('shareCode')}</Text>
+        <Text style={[styles.codeValue, { color: colors.primary }]}>{user?.referralCode || '---'}</Text>
+        <Text style={[styles.codeHint, { color: colors.textMuted }]}>{t('shareCode')}</Text>
       </GlowCard>
 
       <View style={styles.shareRow}>
-        <Pressable onPress={handleCopyLink} style={({ pressed }) => [styles.shareBtn, pressed && { opacity: 0.8 }]}>
+        <Pressable onPress={handleCopyLink} style={({ pressed }) => [styles.shareBtn, { backgroundColor: colors.primary }, pressed && { opacity: 0.8 }]}>
           <Ionicons name="copy-outline" size={18} color="#FFFFFF" />
           <Text style={styles.shareBtnText}>{t('copyLink')}</Text>
         </Pressable>
-        <Pressable onPress={handleShareLink} style={({ pressed }) => [styles.shareBtn, styles.shareBtnAccent, pressed && { opacity: 0.8 }]}>
+        <Pressable onPress={handleShareLink} style={({ pressed }) => [styles.shareBtn, { backgroundColor: colors.accent }, pressed && { opacity: 0.8 }]}>
           <Ionicons name="share-social-outline" size={18} color="#FFFFFF" />
           <Text style={styles.shareBtnText}>{t('shareLink')}</Text>
         </Pressable>
       </View>
 
-      <Text style={styles.sectionTitle}>{t('yourNetwork')}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('yourNetwork')}</Text>
       {(!network || network.length === 0) ? (
         <GlowCard style={styles.emptyCard}>
-          <Ionicons name="people-outline" size={32} color={Colors.dark.textMuted} />
-          <Text style={styles.emptyText}>{t('noReferrals')}</Text>
+          <Ionicons name="people-outline" size={32} color={colors.textMuted} />
+          <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('noReferrals')}</Text>
         </GlowCard>
       ) : (
         <View style={styles.networkList}>
           {network.map((ref: any) => (
             <GlowCard key={ref.id} style={styles.refItem}>
               <View style={styles.refRow}>
-                <View style={styles.refAvatar}>
-                  <Text style={styles.refAvatarText}>{ref.displayName?.charAt(0)?.toUpperCase() || '?'}</Text>
+                <View style={[styles.refAvatar, { backgroundColor: colors.primaryDim, borderColor: colors.primary }]}>
+                  <Text style={[styles.refAvatarText, { color: colors.primary }]}>{ref.displayName?.charAt(0)?.toUpperCase() || '?'}</Text>
                 </View>
                 <View style={styles.refInfo}>
-                  <Text style={styles.refName}>{ref.displayName}</Text>
-                  <Text style={styles.refId}>ID: {ref.userId}</Text>
+                  <Text style={[styles.refName, { color: colors.text }]}>{ref.displayName}</Text>
+                  <Text style={[styles.refId, { color: colors.textMuted }]}>ID: {ref.userId}</Text>
                 </View>
-                <Text style={styles.refDate}>{new Date(ref.createdAt).toLocaleDateString()}</Text>
+                <Text style={[styles.refDate, { color: colors.textMuted }]}>{new Date(ref.createdAt).toLocaleDateString()}</Text>
               </View>
             </GlowCard>
           ))}
         </View>
       )}
 
-      <Text style={styles.sectionTitle}>{t('commissionHistory')}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('commissionHistory')}</Text>
       {(!commissions || commissions.length === 0) ? (
         <GlowCard style={styles.emptyCard}>
-          <Ionicons name="trending-up-outline" size={32} color={Colors.dark.textMuted} />
-          <Text style={styles.emptyText}>{t('noCommissions')}</Text>
+          <Ionicons name="trending-up-outline" size={32} color={colors.textMuted} />
+          <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('noCommissions')}</Text>
         </GlowCard>
       ) : (
         <View style={styles.commList}>
           {commissions.map((c: any) => (
             <GlowCard key={c.id} style={styles.commItem}>
               <View style={styles.commRow}>
-                <View style={[styles.levelBadge, { backgroundColor: Colors.dark.primaryDim }]}>
-                  <Text style={styles.levelText}>L{c.level}</Text>
+                <View style={[styles.levelBadge, { backgroundColor: colors.primaryDim }]}>
+                  <Text style={[styles.levelText, { color: colors.primary }]}>L{c.level}</Text>
                 </View>
                 <View style={styles.commInfo}>
-                  <Text style={styles.commFrom}>{t('level')} {c.level} {t('commission')}</Text>
-                  <Text style={styles.commDate}>{new Date(c.createdAt).toLocaleDateString()}</Text>
+                  <Text style={[styles.commFrom, { color: colors.text }]}>{t('level')} {c.level} {t('commission')}</Text>
+                  <Text style={[styles.commDate, { color: colors.textMuted }]}>{new Date(c.createdAt).toLocaleDateString()}</Text>
                 </View>
-                <Text style={styles.commAmount}>+{Number(c.amount).toFixed(2)}</Text>
+                <Text style={[styles.commAmount, { color: colors.success }]}>+{Number(c.amount).toFixed(2)}</Text>
               </View>
             </GlowCard>
           ))}
@@ -160,7 +161,6 @@ export default function ReferralsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
     paddingHorizontal: 16,
   },
   statsRow: {
@@ -179,19 +179,16 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.dark.primaryDim,
     alignItems: 'center',
     justifyContent: 'center',
   },
   statValue: {
     fontSize: 24,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.text,
   },
   statLabel: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
     textAlign: 'center',
   },
   codeCard: {
@@ -208,18 +205,15 @@ const styles = StyleSheet.create({
   codeLabel: {
     fontSize: 13,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textSecondary,
   },
   codeValue: {
     fontSize: 32,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
     letterSpacing: 4,
   },
   codeHint: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   shareRow: {
     flexDirection: 'row',
@@ -232,12 +226,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.dark.primary,
     paddingVertical: 12,
     borderRadius: 12,
-  },
-  shareBtnAccent: {
-    backgroundColor: Colors.dark.accent,
   },
   shareBtnText: {
     fontSize: 13,
@@ -247,7 +237,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
     marginBottom: 12,
     letterSpacing: 0.5,
   },
@@ -260,7 +249,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   networkList: {
     gap: 8,
@@ -278,16 +266,13 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.dark.primaryDim,
     borderWidth: 1,
-    borderColor: Colors.dark.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   refAvatarText: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
   },
   refInfo: {
     flex: 1,
@@ -295,17 +280,14 @@ const styles = StyleSheet.create({
   refName: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   refId: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   refDate: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   commList: {
     gap: 8,
@@ -328,7 +310,6 @@ const styles = StyleSheet.create({
   levelText: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
   },
   commInfo: {
     flex: 1,
@@ -336,16 +317,13 @@ const styles = StyleSheet.create({
   commFrom: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.text,
   },
   commDate: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   commAmount: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.success,
   },
 });

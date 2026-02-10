@@ -13,7 +13,7 @@ import { NeonButton } from '@/components/NeonButton';
 import { apiRequest, queryClient } from '@/lib/query-client';
 import { requestNotificationPermission } from '@/lib/notifications';
 import { useNotifications } from '@/lib/notifications-context';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 const TIMER_DURATION = 120;
 const CIRCLE_SIZE = 180;
@@ -41,6 +41,7 @@ interface TerminalLine {
 }
 
 function AnimatedDeviceCard({ device, index }: { device: any; index: number }) {
+  const colors = useThemeColors();
   const opacity = useSharedValue(0);
   useEffect(() => {
     opacity.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.ease) });
@@ -54,22 +55,22 @@ function AnimatedDeviceCard({ device, index }: { device: any; index: number }) {
     <Animated.View style={animStyle}>
       <GlowCard style={styles.deviceCard}>
         <View style={styles.deviceRow}>
-          <View style={styles.deviceIconWrap}>
+          <View style={[styles.deviceIconWrap, { backgroundColor: colors.primaryDim }]}>
             {device.brand === 'Apple' ? (
-              <Ionicons name="logo-apple" size={22} color={Colors.dark.primary} />
+              <Ionicons name="logo-apple" size={22} color={colors.primary} />
             ) : device.brand === 'Samsung' ? (
-              <MaterialCommunityIcons name="cellphone" size={22} color={Colors.dark.primary} />
+              <MaterialCommunityIcons name="cellphone" size={22} color={colors.primary} />
             ) : (
-              <MaterialCommunityIcons name="star-four-points" size={22} color={Colors.dark.primary} />
+              <MaterialCommunityIcons name="star-four-points" size={22} color={colors.primary} />
             )}
           </View>
           <View style={styles.deviceInfo}>
-            <Text style={styles.deviceModel}>{device.model}</Text>
-            <Text style={styles.deviceBrand}>{device.brand}</Text>
+            <Text style={[styles.deviceModel, { color: colors.text }]}>{device.model}</Text>
+            <Text style={[styles.deviceBrand, { color: colors.textMuted }]}>{device.brand}</Text>
           </View>
           <View style={styles.deviceValueWrap}>
-            <Text style={styles.deviceValue}>{Number(device.value).toFixed(0)}</Text>
-            <Text style={styles.deviceValueLabel}>credits</Text>
+            <Text style={[styles.deviceValue, { color: colors.primary }]}>{Number(device.value).toFixed(0)}</Text>
+            <Text style={[styles.deviceValueLabel, { color: colors.textMuted }]}>credits</Text>
           </View>
         </View>
       </GlowCard>
@@ -78,6 +79,7 @@ function AnimatedDeviceCard({ device, index }: { device: any; index: number }) {
 }
 
 export default function ManufacturingScreen() {
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { refreshUser } = useAuth();
   const { t } = useLanguage();
@@ -202,10 +204,10 @@ export default function ManufacturingScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }}
     >
-      <Text style={styles.sectionTitle}>{t('selectBrand')}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('selectBrand')}</Text>
       <View style={styles.brandRow}>
         {BRANDS.map((brand) => (
           <Pressable
@@ -213,42 +215,43 @@ export default function ManufacturingScreen() {
             onPress={() => !isGenerating && setSelectedBrand(brand.id)}
             style={[
               styles.brandCard,
-              selectedBrand === brand.id && styles.brandCardSelected,
+              { backgroundColor: colors.card, borderColor: colors.cardBorder },
+              selectedBrand === brand.id && { borderColor: colors.primary, backgroundColor: colors.primaryDim },
               isGenerating && { opacity: 0.5 },
             ]}
           >
             {brand.iconType === 'ionicons' ? (
-              <Ionicons name={brand.icon as any} size={28} color={selectedBrand === brand.id ? Colors.dark.primary : Colors.dark.textSecondary} />
+              <Ionicons name={brand.icon as any} size={28} color={selectedBrand === brand.id ? colors.primary : colors.textSecondary} />
             ) : (
-              <MaterialCommunityIcons name={brand.icon as any} size={28} color={selectedBrand === brand.id ? Colors.dark.primary : Colors.dark.textSecondary} />
+              <MaterialCommunityIcons name={brand.icon as any} size={28} color={selectedBrand === brand.id ? colors.primary : colors.textSecondary} />
             )}
-            <Text style={[styles.brandLabel, selectedBrand === brand.id && { color: Colors.dark.primary }]}>{brand.label}</Text>
+            <Text style={[styles.brandLabel, { color: colors.textSecondary }, selectedBrand === brand.id && { color: colors.primary }]}>{brand.label}</Text>
           </Pressable>
         ))}
       </View>
 
       <GlowCard style={styles.dailyLimitCard}>
         <View style={styles.dailyLimitRow}>
-          <Ionicons name="today-outline" size={18} color={Colors.dark.primary} />
-          <Text style={styles.dailyLimitText}>{t('dailyManufacturing')}</Text>
+          <Ionicons name="today-outline" size={18} color={colors.primary} />
+          <Text style={[styles.dailyLimitText, { color: colors.textSecondary }]}>{t('dailyManufacturing')}</Text>
         </View>
-        <View style={styles.dailyProgressBar}>
-          <View style={[styles.dailyProgressFill, { width: `${(todayCount / dailyLimit) * 100}%` }]} />
+        <View style={[styles.dailyProgressBar, { backgroundColor: colors.cardBorder }]}>
+          <View style={[styles.dailyProgressFill, { width: `${(todayCount / dailyLimit) * 100}%`, backgroundColor: colors.primary }]} />
         </View>
-        <Text style={styles.dailyLimitCount}>{todayCount}/{dailyLimit}</Text>
+        <Text style={[styles.dailyLimitCount, { color: colors.primary }]}>{todayCount}/{dailyLimit}</Text>
       </GlowCard>
 
       {isGenerating ? (
         <Animated.View style={glowStyle}>
-          <GlowCard style={styles.timerCard} glowColor={Colors.dark.primary}>
+          <GlowCard style={styles.timerCard} glowColor={colors.primary}>
             <View style={styles.timerContainer}>
               <Svg width={CIRCLE_SIZE} height={CIRCLE_SIZE} style={{ transform: [{ rotate: '-90deg' }] }}>
-                <Circle cx={CIRCLE_SIZE / 2} cy={CIRCLE_SIZE / 2} r={RADIUS} stroke={Colors.dark.cardBorder} strokeWidth={STROKE_WIDTH} fill="none" />
-                <Circle cx={CIRCLE_SIZE / 2} cy={CIRCLE_SIZE / 2} r={RADIUS} stroke={Colors.dark.primary} strokeWidth={STROKE_WIDTH} fill="none" strokeDasharray={CIRCUMFERENCE} strokeDashoffset={dashOffset} strokeLinecap="round" />
+                <Circle cx={CIRCLE_SIZE / 2} cy={CIRCLE_SIZE / 2} r={RADIUS} stroke={colors.cardBorder} strokeWidth={STROKE_WIDTH} fill="none" />
+                <Circle cx={CIRCLE_SIZE / 2} cy={CIRCLE_SIZE / 2} r={RADIUS} stroke={colors.primary} strokeWidth={STROKE_WIDTH} fill="none" strokeDasharray={CIRCUMFERENCE} strokeDashoffset={dashOffset} strokeLinecap="round" />
               </Svg>
               <View style={styles.timerCenter}>
-                <Text style={styles.timerText}>{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</Text>
-                <Text style={styles.timerLabel}>{t('assembling')}</Text>
+                <Text style={[styles.timerText, { color: colors.primary }]}>{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</Text>
+                <Text style={[styles.timerLabel, { color: colors.textSecondary }]}>{t('assembling')}</Text>
               </View>
             </View>
           </GlowCard>
@@ -258,30 +261,30 @@ export default function ManufacturingScreen() {
           title={todayCount >= dailyLimit ? t('dailyLimitReached') : t('startManufacturing')}
           onPress={startGeneration}
           disabled={!selectedBrand || todayCount >= dailyLimit}
-          icon={<MaterialCommunityIcons name="factory" size={20} color={(!selectedBrand || todayCount >= dailyLimit) ? Colors.dark.textMuted : '#FFFFFF'} />}
+          icon={<MaterialCommunityIcons name="factory" size={20} color={(!selectedBrand || todayCount >= dailyLimit) ? colors.textMuted : '#FFFFFF'} />}
           style={{ marginVertical: 16 }}
         />
       )}
 
       {completedDevice && !isGenerating && (
-        <GlowCard style={styles.successCard} glowColor={Colors.dark.success}>
+        <GlowCard style={styles.successCard} glowColor={colors.success}>
           <View style={styles.successIconWrap}>
-            <Ionicons name="checkmark-circle" size={56} color={Colors.dark.success} />
+            <Ionicons name="checkmark-circle" size={56} color={colors.success} />
           </View>
-          <Text style={styles.successTitle}>{t('deviceComplete')}</Text>
-          <Text style={styles.successModel}>{completedDevice.brand} {completedDevice.model}</Text>
-          <Text style={styles.successValue}>{Number(completedDevice.value).toFixed(0)} {t('credits')}</Text>
+          <Text style={[styles.successTitle, { color: colors.success }]}>{t('deviceComplete')}</Text>
+          <Text style={[styles.successModel, { color: colors.text }]}>{completedDevice.brand} {completedDevice.model}</Text>
+          <Text style={[styles.successValue, { color: colors.primary }]}>{Number(completedDevice.value).toFixed(0)} {t('credits')}</Text>
           <View style={styles.successActions}>
             <Pressable
               onPress={() => postMutation.mutate(completedDevice.id)}
-              style={[styles.postMarketBtn, postMutation.isPending && { opacity: 0.6 }]}
+              style={[styles.postMarketBtn, { backgroundColor: colors.primary }, postMutation.isPending && { opacity: 0.6 }]}
               disabled={postMutation.isPending}
             >
               <Ionicons name="share-social" size={18} color="#FFFFFF" />
               <Text style={styles.postMarketBtnText}>{t('postToMarketplace')}</Text>
             </Pressable>
             <Pressable onPress={() => setCompletedDevice(null)} style={styles.dismissBtn}>
-              <Text style={styles.dismissBtnText}>{t('dismiss')}</Text>
+              <Text style={[styles.dismissBtnText, { color: colors.textMuted }]}>{t('dismiss')}</Text>
             </Pressable>
           </View>
         </GlowCard>
@@ -290,9 +293,9 @@ export default function ManufacturingScreen() {
       {terminalLines.length > 0 && (
         <GlowCard style={styles.terminalCard}>
           <View style={styles.terminalHeader}>
-            <View style={styles.terminalDot} />
-            <View style={[styles.terminalDot, { backgroundColor: Colors.dark.warning }]} />
-            <View style={[styles.terminalDot, { backgroundColor: Colors.dark.success }]} />
+            <View style={[styles.terminalDot, { backgroundColor: colors.danger }]} />
+            <View style={[styles.terminalDot, { backgroundColor: colors.warning }]} />
+            <View style={[styles.terminalDot, { backgroundColor: colors.success }]} />
             <Text style={styles.terminalTitle}>ASSEMBLY LOG</Text>
           </View>
           <ScrollView
@@ -305,28 +308,28 @@ export default function ManufacturingScreen() {
                 key={line.id}
                 style={[
                   styles.terminalLine,
-                  line.type === 'success' && { color: Colors.dark.success },
-                  line.type === 'info' && { color: Colors.dark.accent },
+                  line.type === 'success' && { color: colors.success },
+                  line.type === 'info' && { color: colors.accent },
                 ]}
               >
                 {line.type === 'success' ? '[OK] ' : line.type === 'info' ? '[>>] ' : '[..] '}
                 {line.text}
               </Text>
             ))}
-            <Text style={styles.terminalCursor}>_</Text>
+            <Text style={[styles.terminalCursor, { color: colors.neonGreen }]}>_</Text>
           </ScrollView>
         </GlowCard>
       )}
 
       <View style={styles.devicesHeader}>
-        <Text style={styles.sectionTitle}>{t('yourDevices')}</Text>
-        <Text style={styles.deviceCount}>{devices?.length || 0}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('yourDevices')}</Text>
+        <Text style={[styles.deviceCount, { color: colors.primary, backgroundColor: colors.primaryDim }]}>{devices?.length || 0}</Text>
       </View>
 
       {(!devices || devices.length === 0) ? (
         <GlowCard style={styles.emptyCard}>
-          <MaterialCommunityIcons name="phone-outline" size={32} color={Colors.dark.textMuted} />
-          <Text style={styles.emptyText}>{t('noDevices')}</Text>
+          <MaterialCommunityIcons name="phone-outline" size={32} color={colors.textMuted} />
+          <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('noDevices')}</Text>
         </GlowCard>
       ) : (
         <View style={styles.devicesList}>
@@ -342,13 +345,11 @@ export default function ManufacturingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
     paddingHorizontal: 16,
   },
   sectionTitle: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
     marginTop: 8,
     marginBottom: 12,
     letterSpacing: 0.5,
@@ -360,22 +361,15 @@ const styles = StyleSheet.create({
   },
   brandCard: {
     flex: 1,
-    backgroundColor: Colors.dark.card,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
     padding: 16,
     alignItems: 'center',
     gap: 8,
   },
-  brandCardSelected: {
-    borderColor: Colors.dark.primary,
-    backgroundColor: Colors.dark.primaryDim,
-  },
   brandLabel: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textSecondary,
     textAlign: 'center',
   },
   dailyLimitCard: {
@@ -392,25 +386,21 @@ const styles = StyleSheet.create({
   dailyLimitText: {
     fontSize: 13,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textSecondary,
   },
   dailyProgressBar: {
     width: '100%',
     height: 8,
-    backgroundColor: Colors.dark.cardBorder,
     borderRadius: 4,
     overflow: 'hidden',
     marginBottom: 6,
   },
   dailyProgressFill: {
     height: '100%',
-    backgroundColor: Colors.dark.primary,
     borderRadius: 4,
   },
   dailyLimitCount: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
   },
   timerCard: {
     padding: 24,
@@ -430,12 +420,10 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: 36,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
   },
   timerLabel: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 2,
   },
@@ -457,7 +445,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: Colors.dark.danger,
   },
   terminalTitle: {
     fontSize: 11,
@@ -479,7 +466,6 @@ const styles = StyleSheet.create({
   terminalCursor: {
     fontSize: 14,
     fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
-    color: Colors.dark.neonGreen,
     marginTop: 4,
   },
   devicesHeader: {
@@ -490,8 +476,6 @@ const styles = StyleSheet.create({
   deviceCount: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.primary,
-    backgroundColor: Colors.dark.primaryDim,
     paddingHorizontal: 10,
     paddingVertical: 2,
     borderRadius: 10,
@@ -504,7 +488,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   devicesList: {
     gap: 8,
@@ -521,7 +504,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.dark.primaryDim,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -531,12 +513,10 @@ const styles = StyleSheet.create({
   deviceModel: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   deviceBrand: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   deviceValueWrap: {
     alignItems: 'flex-end',
@@ -544,12 +524,10 @@ const styles = StyleSheet.create({
   deviceValue: {
     fontSize: 18,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
   },
   deviceValueLabel: {
     fontSize: 10,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   successCard: {
     padding: 24,
@@ -563,17 +541,14 @@ const styles = StyleSheet.create({
   successTitle: {
     fontSize: 18,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.success,
   },
   successModel: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   successValue: {
     fontSize: 22,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
     marginBottom: 8,
   },
   successActions: {
@@ -586,7 +561,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.dark.primary,
     paddingVertical: 14,
     borderRadius: 12,
   },
@@ -602,6 +576,5 @@ const styles = StyleSheet.create({
   dismissBtnText: {
     fontSize: 13,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textMuted,
   },
 });

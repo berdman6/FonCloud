@@ -9,9 +9,10 @@ import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { GlowCard } from '@/components/GlowCard';
 import { apiRequest } from '@/lib/query-client';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 function ListingCard({ listing, userId, onLike }: { listing: any; userId: string; onLike: (id: number) => void }) {
+  const colors = useThemeColors();
   const opacity = useSharedValue(0);
   React.useEffect(() => {
     opacity.value = withTiming(1, { duration: 400 });
@@ -34,40 +35,40 @@ function ListingCard({ listing, userId, onLike }: { listing: any; userId: string
     <Animated.View style={animStyle}>
       <GlowCard style={styles.listingCard}>
         <View style={styles.listingHeader}>
-          <View style={styles.sellerAvatar}>
-            <Text style={styles.sellerAvatarText}>{listing.sellerName?.charAt(0)?.toUpperCase() || '?'}</Text>
+          <View style={[styles.sellerAvatar, { backgroundColor: colors.primaryDim, borderColor: colors.primary }]}>
+            <Text style={[styles.sellerAvatarText, { color: colors.primary }]}>{listing.sellerName?.charAt(0)?.toUpperCase() || '?'}</Text>
           </View>
           <View style={styles.sellerInfo}>
-            <Text style={styles.sellerName}>{listing.sellerName}</Text>
-            <Text style={styles.postedTime}>{timeAgo(listing.createdAt)}</Text>
+            <Text style={[styles.sellerName, { color: colors.text }]}>{listing.sellerName}</Text>
+            <Text style={[styles.postedTime, { color: colors.textMuted }]}>{timeAgo(listing.createdAt)}</Text>
           </View>
-          <View style={styles.priceBadge}>
-            <Ionicons name="diamond" size={12} color={Colors.dark.primary} />
-            <Text style={styles.priceText}>{Number(listing.price).toFixed(0)}</Text>
+          <View style={[styles.priceBadge, { backgroundColor: colors.primaryDim, borderColor: colors.cardBorder }]}>
+            <Ionicons name="diamond" size={12} color={colors.primary} />
+            <Text style={[styles.priceText, { color: colors.primary }]}>{Number(listing.price).toFixed(0)}</Text>
           </View>
         </View>
 
-        <View style={styles.deviceDisplay}>
-          <View style={styles.deviceDisplayIcon}>
+        <View style={[styles.deviceDisplay, { backgroundColor: colors.primaryDim }]}>
+          <View style={[styles.deviceDisplayIcon, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
             {listing.brand === 'Apple' ? (
-              <Ionicons name="logo-apple" size={36} color={Colors.dark.primary} />
+              <Ionicons name="logo-apple" size={36} color={colors.primary} />
             ) : listing.brand === 'Samsung' ? (
-              <MaterialCommunityIcons name="cellphone" size={36} color={Colors.dark.primary} />
+              <MaterialCommunityIcons name="cellphone" size={36} color={colors.primary} />
             ) : (
-              <MaterialCommunityIcons name="star-four-points" size={36} color={Colors.dark.primary} />
+              <MaterialCommunityIcons name="star-four-points" size={36} color={colors.primary} />
             )}
           </View>
-          <Text style={styles.deviceModelName}>{listing.model}</Text>
-          <Text style={styles.deviceBrandName}>{listing.brand}</Text>
+          <Text style={[styles.deviceModelName, { color: colors.text }]}>{listing.model}</Text>
+          <Text style={[styles.deviceBrandName, { color: colors.textMuted }]}>{listing.brand}</Text>
         </View>
 
         <View style={styles.listingActions}>
           <Pressable
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onLike(listing.id); }}
-            style={styles.actionBtn}
+            style={[styles.actionBtn, { backgroundColor: colors.primaryDim }]}
           >
-            <Ionicons name="heart-outline" size={20} color={Colors.dark.primary} />
-            <Text style={styles.actionCount}>{listing.likes || 0}</Text>
+            <Ionicons name="heart-outline" size={20} color={colors.primary} />
+            <Text style={[styles.actionCount, { color: colors.primary }]}>{listing.likes || 0}</Text>
           </Pressable>
         </View>
       </GlowCard>
@@ -76,6 +77,7 @@ function ListingCard({ listing, userId, onLike }: { listing: any; userId: string
 }
 
 export default function MarketplaceScreen() {
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -102,19 +104,19 @@ export default function MarketplaceScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.dark.primary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
       >
         <View style={styles.headerRow}>
-          <Text style={styles.sectionTitle}>{t('feed')}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('feed')}</Text>
         </View>
 
         {(!listings || listings.length === 0) ? (
           <GlowCard style={styles.emptyCard}>
-            <Ionicons name="storefront-outline" size={40} color={Colors.dark.textMuted} />
-            <Text style={styles.emptyText}>{t('noListings')}</Text>
+            <Ionicons name="storefront-outline" size={40} color={colors.textMuted} />
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('noListings')}</Text>
           </GlowCard>
         ) : (
           <View style={styles.listingsGrid}>
@@ -136,7 +138,6 @@ export default function MarketplaceScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
     paddingHorizontal: 16,
   },
   headerRow: {
@@ -149,7 +150,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
     letterSpacing: 0.5,
   },
   emptyCard: {
@@ -160,7 +160,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   listingsGrid: {
     gap: 12,
@@ -178,16 +177,13 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.dark.primaryDim,
     borderWidth: 1,
-    borderColor: Colors.dark.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   sellerAvatarText: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
   },
   sellerInfo: {
     flex: 1,
@@ -195,33 +191,27 @@ const styles = StyleSheet.create({
   sellerName: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   postedTime: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   priceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: Colors.dark.primaryDim,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
   },
   priceText: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
   },
   deviceDisplay: {
     alignItems: 'center',
     paddingVertical: 16,
-    backgroundColor: Colors.dark.primaryDim,
     borderRadius: 12,
     marginBottom: 12,
   },
@@ -229,22 +219,18 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: Colors.dark.card,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
   },
   deviceModelName: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   deviceBrandName: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   listingActions: {
     flexDirection: 'row',
@@ -257,11 +243,9 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 20,
-    backgroundColor: Colors.dark.primaryDim,
   },
   actionCount: {
     fontSize: 13,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.primary,
   },
 });

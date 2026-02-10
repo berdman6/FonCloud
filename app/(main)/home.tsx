@@ -13,7 +13,7 @@ import type { AppNotification } from '@/lib/notifications-context';
 import { GlowCard } from '@/components/GlowCard';
 import { PortalAnimation } from '@/components/PortalAnimation';
 import { FloatingBackground } from '@/components/FloatingBackground';
-import Colors from '@/constants/colors';
+import { useThemeColors } from '@/lib/theme-context';
 
 const ACTION_THEMES = [
   { gradient: ['#39FF14', '#1ABB00'] as const, shadowColor: '#39FF14' },
@@ -23,6 +23,7 @@ const ACTION_THEMES = [
 ];
 
 function QuickAction({ icon, label, route, delay, themeIndex }: { icon: React.ReactNode; label: string; route: string; delay: number; themeIndex: number }) {
+  const colors = useThemeColors();
   const scale = useSharedValue(0);
   const theme = ACTION_THEMES[themeIndex % ACTION_THEMES.length];
   useEffect(() => {
@@ -34,7 +35,7 @@ function QuickAction({ icon, label, route, delay, themeIndex }: { icon: React.Re
   }));
   return (
     <Animated.View style={[animStyle, { flexGrow: 1, flexBasis: '45%' }]}>
-      <Pressable onPress={() => router.push(route as any)} style={({ pressed }) => [styles.actionCard, pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] }]}>
+      <Pressable onPress={() => router.push(route as any)} style={({ pressed }) => [styles.actionCard, { backgroundColor: colors.card }, pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] }]}>
         <View style={[styles.actionIconWrap, { shadowColor: theme.shadowColor }]}>
           <LinearGradient
             colors={[theme.gradient[0], theme.gradient[1]]}
@@ -45,9 +46,9 @@ function QuickAction({ icon, label, route, delay, themeIndex }: { icon: React.Re
             {icon}
           </LinearGradient>
         </View>
-        <Text style={styles.actionLabel}>{label}</Text>
-        <View style={styles.actionArrow}>
-          <Feather name="chevron-right" size={14} color={Colors.dark.textMuted} />
+        <Text style={[styles.actionLabel, { color: colors.text }]}>{label}</Text>
+        <View style={[styles.actionArrow, { backgroundColor: colors.background }]}>
+          <Feather name="chevron-right" size={14} color={colors.textMuted} />
         </View>
       </Pressable>
     </Animated.View>
@@ -55,30 +56,31 @@ function QuickAction({ icon, label, route, delay, themeIndex }: { icon: React.Re
 }
 
 function BarChart({ data, t }: { data: any[]; t: (k: string) => string }) {
+  const colors = useThemeColors();
   const maxVal = Math.max(...data.map(d => d.total), 1);
 
   return (
     <GlowCard style={styles.chartCard}>
       <View style={styles.chartHeader}>
         <View style={styles.chartTitleRow}>
-          <Ionicons name="bar-chart-outline" size={18} color={Colors.dark.primary} />
-          <Text style={styles.chartTitle}>{t('earningsDashboard')}</Text>
+          <Ionicons name="bar-chart-outline" size={18} color={colors.primary} />
+          <Text style={[styles.chartTitle, { color: colors.text }]}>{t('earningsDashboard')}</Text>
         </View>
-        <Text style={styles.chartSubtitle}>{t('last7Days')}</Text>
+        <Text style={[styles.chartSubtitle, { color: colors.textMuted }]}>{t('last7Days')}</Text>
       </View>
 
       <View style={styles.chartLegend}>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: Colors.dark.primary }]} />
-          <Text style={styles.legendText}>{t('manufacturing')}</Text>
+          <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
+          <Text style={[styles.legendText, { color: colors.textMuted }]}>{t('manufacturing')}</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: Colors.dark.accent }]} />
-          <Text style={styles.legendText}>{t('commission')}</Text>
+          <View style={[styles.legendDot, { backgroundColor: colors.accent }]} />
+          <Text style={[styles.legendText, { color: colors.textMuted }]}>{t('commission')}</Text>
         </View>
       </View>
 
-      <View style={styles.chartBody}>
+      <View style={[styles.chartBody, { borderBottomColor: colors.divider }]}>
         {data.map((day, idx) => {
           const mfgHeight = maxVal > 0 ? (day.manufacturing / maxVal) * 100 : 0;
           const commHeight = maxVal > 0 ? (day.commission / maxVal) * 100 : 0;
@@ -87,10 +89,10 @@ function BarChart({ data, t }: { data: any[]; t: (k: string) => string }) {
           return (
             <View key={idx} style={styles.chartColumn}>
               <View style={styles.chartBarsWrap}>
-                <View style={[styles.chartBar, { height: `${Math.max(mfgHeight, 2)}%`, backgroundColor: Colors.dark.primary }]} />
-                <View style={[styles.chartBar, { height: `${Math.max(commHeight, 2)}%`, backgroundColor: Colors.dark.accent }]} />
+                <View style={[styles.chartBar, { height: `${Math.max(mfgHeight, 2)}%`, backgroundColor: colors.primary }]} />
+                <View style={[styles.chartBar, { height: `${Math.max(commHeight, 2)}%`, backgroundColor: colors.accent }]} />
               </View>
-              <Text style={styles.chartDayLabel}>{dayLabel}</Text>
+              <Text style={[styles.chartDayLabel, { color: colors.textMuted }]}>{dayLabel}</Text>
             </View>
           );
         })}
@@ -98,22 +100,22 @@ function BarChart({ data, t }: { data: any[]; t: (k: string) => string }) {
 
       <View style={styles.chartTotals}>
         <View style={styles.chartTotalItem}>
-          <Text style={styles.chartTotalLabel}>{t('manufacturing')}</Text>
-          <Text style={[styles.chartTotalValue, { color: Colors.dark.primary }]}>
+          <Text style={[styles.chartTotalLabel, { color: colors.textMuted }]}>{t('manufacturing')}</Text>
+          <Text style={[styles.chartTotalValue, { color: colors.primary }]}>
             {data.reduce((s, d) => s + d.manufacturing, 0).toFixed(0)}
           </Text>
         </View>
-        <View style={styles.chartTotalDivider} />
+        <View style={[styles.chartTotalDivider, { backgroundColor: colors.divider }]} />
         <View style={styles.chartTotalItem}>
-          <Text style={styles.chartTotalLabel}>{t('commission')}</Text>
-          <Text style={[styles.chartTotalValue, { color: Colors.dark.accent }]}>
+          <Text style={[styles.chartTotalLabel, { color: colors.textMuted }]}>{t('commission')}</Text>
+          <Text style={[styles.chartTotalValue, { color: colors.accent }]}>
             {data.reduce((s, d) => s + d.commission, 0).toFixed(0)}
           </Text>
         </View>
-        <View style={styles.chartTotalDivider} />
+        <View style={[styles.chartTotalDivider, { backgroundColor: colors.divider }]} />
         <View style={styles.chartTotalItem}>
-          <Text style={styles.chartTotalLabel}>{t('totalIncome')}</Text>
-          <Text style={[styles.chartTotalValue, { color: Colors.dark.success }]}>
+          <Text style={[styles.chartTotalLabel, { color: colors.textMuted }]}>{t('totalIncome')}</Text>
+          <Text style={[styles.chartTotalValue, { color: colors.success }]}>
             {data.reduce((s, d) => s + d.total, 0).toFixed(0)}
           </Text>
         </View>
@@ -145,6 +147,7 @@ const COIN_IMAGES: Record<string, any> = {
 };
 
 function FeedRow({ item, index, t }: { item: any; index: number; t: (k: string) => string }) {
+  const colors = useThemeColors();
   const label = t(item.action) || ACTION_LABELS[item.action] || item.action;
   const coinImg = COIN_IMAGES[item.action] || COIN_IMAGES.transfer;
   const isEven = index % 2 === 0;
@@ -171,6 +174,7 @@ const FEED_VISIBLE_ROWS = 6;
 const FEED_SCROLL_INTERVAL = 2000;
 
 function ActivityFeed({ t }: { t: (k: string) => string }) {
+  const colors = useThemeColors();
   const { data } = useQuery<any>({ queryKey: ['/api/dashboard/activity-feed'] });
   const feed = data?.feed || [];
   const scrollRef = useRef<ScrollView>(null);
@@ -208,7 +212,7 @@ function ActivityFeed({ t }: { t: (k: string) => string }) {
           <View style={feedStyles.liveIndicator}>
             <View style={feedStyles.liveDot} />
           </View>
-          <Text style={feedStyles.headerTitle}>{t('liveFeed')}</Text>
+          <Text style={[feedStyles.headerTitle, { color: colors.text }]}>{t('liveFeed')}</Text>
         </View>
       </View>
 
@@ -238,6 +242,7 @@ function ActivityFeed({ t }: { t: (k: string) => string }) {
 }
 
 function NotificationToast({ notification, onDismiss, onPress }: { notification: AppNotification; onDismiss: () => void; onPress: () => void }) {
+  const colors = useThemeColors();
   const translateY = useSharedValue(-100);
   const opacity = useSharedValue(0);
 
@@ -262,7 +267,7 @@ function NotificationToast({ notification, onDismiss, onPress }: { notification:
 
   return (
     <Animated.View style={[styles.toastContainer, animStyle]}>
-      <Pressable onPress={onPress} style={styles.toastContent}>
+      <Pressable onPress={onPress} style={[styles.toastContent, { backgroundColor: colors.primary }]}>
         <View style={[styles.toastIconWrap, { backgroundColor: notification.iconColor }]}>
           <Ionicons name={notification.icon as any} size={20} color="#FFFFFF" />
         </View>
@@ -283,6 +288,7 @@ function NotificationToast({ notification, onDismiss, onPress }: { notification:
 }
 
 export default function HomeScreen() {
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { user, refreshUser } = useAuth();
   const { t } = useLanguage();
@@ -343,52 +349,52 @@ export default function HomeScreen() {
       <ScrollView
         style={styles.container}
         contentContainerStyle={{ paddingBottom: insets.bottom + (Platform.OS === 'web' ? 34 : 20) }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.dark.primary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
       >
         <View style={styles.welcomeSection}>
           <View style={styles.portalWrap}>
             <PortalAnimation size={240} />
           </View>
-          <Text style={styles.welcomeText}>{t('welcomeBack')}</Text>
-          <Text style={styles.userName}>{user?.displayName || 'User'}</Text>
+          <Text style={[styles.welcomeText, { color: colors.textSecondary }]}>{t('welcomeBack')}</Text>
+          <Text style={[styles.userName, { color: colors.text }]}>{user?.displayName || 'User'}</Text>
         </View>
 
         {unreadCount > 0 && (
           <Pressable onPress={() => router.push('/(main)/notifications' as any)} style={styles.notifBanner}>
             <View style={styles.notifBannerLeft}>
-              <Ionicons name="notifications" size={18} color={Colors.dark.accent} />
-              <Text style={styles.notifBannerText}>
+              <Ionicons name="notifications" size={18} color={colors.accent} />
+              <Text style={[styles.notifBannerText, { color: colors.accent }]}>
                 {unreadCount} {t('newNotifications')}
               </Text>
             </View>
-            <Feather name="chevron-right" size={16} color={Colors.dark.accent} />
+            <Feather name="chevron-right" size={16} color={colors.accent} />
           </Pressable>
         )}
 
         <Animated.View style={glowStyle}>
         <GlowCard style={styles.balanceCard}>
           <View style={styles.balanceContent}>
-            <Text style={styles.balanceLabel}>{t('totalBalance')}</Text>
-            <Text style={styles.balanceAmount}>{Number(user?.walletBalance || 0).toFixed(2)}</Text>
-            <Text style={styles.creditLabel}>{t('credits')}</Text>
+            <Text style={[styles.balanceLabel, { color: colors.textSecondary }]}>{t('totalBalance')}</Text>
+            <Text style={[styles.balanceAmount, { color: colors.primary }]}>{Number(user?.walletBalance || 0).toFixed(2)}</Text>
+            <Text style={[styles.creditLabel, { color: colors.textMuted }]}>{t('credits')}</Text>
           </View>
-          <View style={styles.balanceStats}>
+          <View style={[styles.balanceStats, { borderTopColor: colors.divider }]}>
             <View style={styles.statItem}>
-              <Ionicons name="trending-up" size={16} color={Colors.dark.success} />
-              <Text style={styles.statValue}>{Number(user?.totalEarnings || 0).toFixed(2)}</Text>
-              <Text style={styles.statLabel}>{t('totalEarned')}</Text>
+              <Ionicons name="trending-up" size={16} color={colors.success} />
+              <Text style={[styles.statValue, { color: colors.text }]}>{Number(user?.totalEarnings || 0).toFixed(2)}</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('totalEarned')}</Text>
             </View>
-            <View style={styles.statDivider} />
+            <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.statItem}>
-              <Ionicons name="people" size={16} color={Colors.dark.accent} />
-              <Text style={styles.statValue}>{user?.totalReferrals || 0}</Text>
-              <Text style={styles.statLabel}>{t('referrals')}</Text>
+              <Ionicons name="people" size={16} color={colors.accent} />
+              <Text style={[styles.statValue, { color: colors.text }]}>{user?.totalReferrals || 0}</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('referrals')}</Text>
             </View>
-            <View style={styles.statDivider} />
+            <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.statItem}>
-              <Ionicons name="phone-portrait" size={16} color={Colors.dark.secondary} />
-              <Text style={styles.statValue}>{devicesList.length || 0}</Text>
-              <Text style={styles.statLabel}>{t('yourDevices')}</Text>
+              <Ionicons name="phone-portrait" size={16} color={colors.secondary} />
+              <Text style={[styles.statValue, { color: colors.text }]}>{devicesList.length || 0}</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('yourDevices')}</Text>
             </View>
           </View>
         </GlowCard>
@@ -398,7 +404,7 @@ export default function HomeScreen() {
         <BarChart data={chartData} t={t} />
       )}
 
-      <Text style={styles.sectionTitle}>{t('quickActions')}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('quickActions')}</Text>
       <View style={styles.actionsGrid}>
         <QuickAction icon={<MaterialCommunityIcons name="factory" size={22} color="#FFFFFF" />} label={t('manufacturing')} route="/(main)/manufacturing" delay={0} themeIndex={0} />
         <QuickAction icon={<Ionicons name="wallet" size={22} color="#FFFFFF" />} label={t('wallet')} route="/(main)/wallet" delay={100} themeIndex={1} />
@@ -409,30 +415,30 @@ export default function HomeScreen() {
       <ActivityFeed t={t} />
 
       <View style={styles.recentHeader}>
-        <Text style={styles.sectionTitle}>{t('recentActivity')}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('recentActivity')}</Text>
       </View>
       {(!transactions || transactions.length === 0) ? (
         <GlowCard style={styles.emptyCard}>
-          <Ionicons name="time-outline" size={32} color={Colors.dark.textMuted} />
-          <Text style={styles.emptyText}>{t('noActivity')}</Text>
+          <Ionicons name="time-outline" size={32} color={colors.textMuted} />
+          <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('noActivity')}</Text>
         </GlowCard>
       ) : (
         <View style={styles.txList}>
           {transactions.slice(0, 5).map((tx: any) => (
             <GlowCard key={tx.id} style={styles.txItem}>
               <View style={styles.txRow}>
-                <View style={[styles.txIcon, { backgroundColor: tx.type === 'transfer_sent' || tx.type === 'device_purchase' ? Colors.dark.dangerDim : Colors.dark.successDim }]}>
+                <View style={[styles.txIcon, { backgroundColor: tx.type === 'transfer_sent' || tx.type === 'device_purchase' ? colors.dangerDim : colors.successDim }]}>
                   <Ionicons
                     name={tx.type === 'transfer_sent' || tx.type === 'device_purchase' ? 'arrow-up' : 'arrow-down'}
                     size={16}
-                    color={tx.type === 'transfer_sent' || tx.type === 'device_purchase' ? Colors.dark.danger : Colors.dark.success}
+                    color={tx.type === 'transfer_sent' || tx.type === 'device_purchase' ? colors.danger : colors.success}
                   />
                 </View>
                 <View style={styles.txInfo}>
-                  <Text style={styles.txType}>{tx.description || tx.type}</Text>
-                  <Text style={styles.txDate}>{new Date(tx.createdAt).toLocaleDateString()}</Text>
+                  <Text style={[styles.txType, { color: colors.text }]}>{tx.description || tx.type}</Text>
+                  <Text style={[styles.txDate, { color: colors.textMuted }]}>{new Date(tx.createdAt).toLocaleDateString()}</Text>
                 </View>
-                <Text style={[styles.txAmount, { color: tx.type === 'transfer_sent' || tx.type === 'device_purchase' ? Colors.dark.danger : Colors.dark.success }]}>
+                <Text style={[styles.txAmount, { color: tx.type === 'transfer_sent' || tx.type === 'device_purchase' ? colors.danger : colors.success }]}>
                   {tx.type === 'transfer_sent' || tx.type === 'device_purchase' ? '-' : '+'}{Number(tx.amount).toFixed(2)}
                 </Text>
               </View>
@@ -464,12 +470,10 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textSecondary,
   },
   userName: {
     fontSize: 24,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.text,
   },
   notifBanner: {
     flexDirection: 'row',
@@ -491,7 +495,6 @@ const styles = StyleSheet.create({
   notifBannerText: {
     fontSize: 13,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.accent,
   },
   balanceCard: {
     padding: 20,
@@ -504,20 +507,17 @@ const styles = StyleSheet.create({
   balanceLabel: {
     fontSize: 13,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 2,
   },
   balanceAmount: {
     fontSize: 42,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.primary,
     marginTop: 4,
   },
   creditLabel: {
     fontSize: 12,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textMuted,
     letterSpacing: 1,
   },
   balanceStats: {
@@ -525,7 +525,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     borderTopWidth: 1,
-    borderTopColor: Colors.dark.divider,
     paddingTop: 14,
   },
   statItem: {
@@ -536,17 +535,14 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_700Bold',
-    color: Colors.dark.text,
   },
   statLabel: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   statDivider: {
     width: 1,
     height: 30,
-    backgroundColor: Colors.dark.divider,
   },
   chartCard: {
     padding: 16,
@@ -563,12 +559,10 @@ const styles = StyleSheet.create({
   chartTitle: {
     fontSize: 15,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
   },
   chartSubtitle: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
     marginTop: 2,
   },
   chartLegend: {
@@ -589,7 +583,6 @@ const styles = StyleSheet.create({
   legendText: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   chartBody: {
     flexDirection: 'row',
@@ -598,7 +591,6 @@ const styles = StyleSheet.create({
     gap: 4,
     marginBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.divider,
     paddingBottom: 4,
   },
   chartColumn: {
@@ -622,7 +614,6 @@ const styles = StyleSheet.create({
   chartDayLabel: {
     fontSize: 10,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.textMuted,
     marginTop: 4,
   },
   chartTotals: {
@@ -638,7 +629,6 @@ const styles = StyleSheet.create({
   chartTotalLabel: {
     fontSize: 10,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   chartTotalValue: {
     fontSize: 16,
@@ -647,12 +637,10 @@ const styles = StyleSheet.create({
   chartTotalDivider: {
     width: 1,
     height: 24,
-    backgroundColor: Colors.dark.divider,
   },
   sectionTitle: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
     marginBottom: 12,
     letterSpacing: 0.5,
   },
@@ -663,7 +651,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   actionCard: {
-    backgroundColor: Colors.dark.card,
     borderRadius: 16,
     padding: 14,
     flexDirection: 'row',
@@ -692,14 +679,12 @@ const styles = StyleSheet.create({
   actionLabel: {
     fontSize: 13,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
     flex: 1,
   },
   actionArrow: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: Colors.dark.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -716,7 +701,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   txList: {
     gap: 8,
@@ -742,12 +726,10 @@ const styles = StyleSheet.create({
   txType: {
     fontSize: 14,
     fontFamily: 'HindSiliguri_500Medium',
-    color: Colors.dark.text,
   },
   txDate: {
     fontSize: 11,
     fontFamily: 'HindSiliguri_400Regular',
-    color: Colors.dark.textMuted,
   },
   txAmount: {
     fontSize: 16,
@@ -763,7 +745,6 @@ const styles = StyleSheet.create({
   toastContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.dark.primary,
     borderRadius: 14,
     padding: 12,
     gap: 10,
@@ -828,7 +809,6 @@ const feedStyles = StyleSheet.create({
   headerTitle: {
     fontSize: 16,
     fontFamily: 'HindSiliguri_600SemiBold',
-    color: Colors.dark.text,
     letterSpacing: 0.5,
   },
   tableCard: {
