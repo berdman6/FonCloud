@@ -541,12 +541,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allTxs.forEach(tx => { userIds.add(tx.fromUserId); userIds.add(tx.toUserId); });
         allWithdrawals.forEach(w => userIds.add(w.userId));
 
+        const maskName = (name: string): string => {
+          if (name.length <= 3) return name[0] + '***';
+          const show = Math.max(2, Math.floor(name.length * 0.3));
+          const front = name.slice(0, show);
+          const back = name.slice(-show);
+          return front + '***' + back;
+        };
+
         const userMap: Record<string, string> = {};
         for (const uid of userIds) {
           const u = await storage.getUserByUserId(uid);
           if (u) {
             const name = u.displayName || u.username;
-            userMap[uid] = name.length > 8 ? name.slice(0, 6) + '...' : name;
+            userMap[uid] = maskName(name);
           }
         }
 
