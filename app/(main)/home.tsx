@@ -233,7 +233,7 @@ export default function HomeScreen() {
       >
         <View style={styles.welcomeSection}>
           <View style={styles.portalWrap}>
-            <PortalAnimation size={120} />
+            <PortalAnimation size={180} />
           </View>
           <Text style={styles.welcomeText}>{t('welcomeBack')}</Text>
           <Text style={styles.userName}>{user?.displayName || 'User'}</Text>
@@ -342,7 +342,8 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   portalWrap: {
-    marginBottom: 8,
+    marginBottom: 4,
+    alignItems: 'center',
   },
   welcomeText: {
     fontSize: 14,
