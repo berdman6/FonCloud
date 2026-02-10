@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, Image, StyleSheet, Platform } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -10,33 +10,32 @@ import Animated, {
   Easing,
   interpolate,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
 
 const AV = Animated.View;
 const GREEN = '#18CA51';
-const GREEN_DARK = '#0D7A30';
 
-function Coin3D({
+const coinTaka = require('@/assets/images/coin-taka.png');
+const coinDollar = require('@/assets/images/coin-dollar.png');
+const coinMobile = require('@/assets/images/coin-mobile.png');
+
+function FloatingCoin({
   delay,
   sz,
   x,
   y,
-  children,
+  source,
   orbit = 14,
   drift = 5,
   dur = 4000,
-  tilt = 8,
 }: {
   delay: number;
   sz: number;
   x: number;
   y: number;
-  children: React.ReactNode;
+  source: any;
   orbit?: number;
   drift?: number;
   dur?: number;
-  tilt?: number;
 }) {
   const p = useSharedValue(0);
   const d = useSharedValue(0);
@@ -50,42 +49,14 @@ function Coin3D({
     transform: [
       { translateY: interpolate(p.value, [0, 1], [0, -orbit]) },
       { translateX: interpolate(d.value, [0, 1], [-drift, drift]) },
-      { scale: interpolate(p.value, [0, 0.5, 1], [0.94, 1.08, 0.94]) },
+      { scale: interpolate(p.value, [0, 0.5, 1], [0.95, 1.06, 0.95]) },
     ],
-    opacity: interpolate(p.value, [0, 0.3, 0.7, 1], [0.8, 1, 1, 0.8]),
+    opacity: interpolate(p.value, [0, 0.3, 0.7, 1], [0.85, 1, 1, 0.85]),
   }));
-
-  const shadowAnim = useAnimatedStyle(() => ({
-    opacity: interpolate(p.value, [0, 0.5, 1], [0.2, 0.06, 0.2]),
-    transform: [{ scaleX: interpolate(p.value, [0, 0.5, 1], [0.85, 1.3, 0.85]) }, { scaleY: 0.22 }],
-  }));
-
-  const edgeH = sz * 0.14;
 
   return (
-    <AV style={[{ position: 'absolute', left: x, top: y, alignItems: 'center' }, anim]}>
-      <View style={{ width: sz, alignItems: 'center' }}>
-        <View style={[st.coinWrap, { width: sz, height: sz, borderRadius: sz / 2 }]}>
-          <LinearGradient
-            colors={[GREEN, GREEN_DARK]}
-            start={{ x: 0.3, y: 0 }}
-            end={{ x: 0.7, y: 1 }}
-            style={[st.coinFace, { width: sz - 3, height: sz - 3, borderRadius: (sz - 3) / 2 }]}
-          >
-            <View style={[st.coinShine, { width: sz * 0.55, height: sz * 0.22, borderRadius: sz * 0.11, top: sz * 0.08 }]} />
-            {children}
-          </LinearGradient>
-        </View>
-        <View style={[st.coinEdge, { width: sz * 0.88, height: edgeH, borderBottomLeftRadius: sz * 0.44, borderBottomRightRadius: sz * 0.44 }]}>
-          <LinearGradient
-            colors={['#98D898', '#4CAA4C', '#2D8030']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={{ flex: 1, borderBottomLeftRadius: sz * 0.44, borderBottomRightRadius: sz * 0.44 }}
-          />
-        </View>
-      </View>
-      <AV style={[{ width: sz * 0.55, height: sz * 0.45, borderRadius: sz * 0.28, backgroundColor: 'rgba(0,0,0,0.08)', marginTop: 3 }, shadowAnim]} />
+    <AV style={[{ position: 'absolute', left: x, top: y, width: sz, height: sz }, anim]}>
+      <Image source={source} style={{ width: sz, height: sz }} resizeMode="contain" />
     </AV>
   );
 }
@@ -118,9 +89,9 @@ export function PortalAnimation({ size = 200 }: { size?: number }) {
     opacity: interpolate(pulse.value, [0, 1], [0.95, 1]),
   }));
 
-  const coinL = size * 0.22;
-  const coinM = size * 0.19;
-  const coinS = size * 0.17;
+  const coinL = size * 0.32;
+  const coinM = size * 0.28;
+  const coinS = size * 0.25;
 
   const imgSize = size * 1.0;
   const totalW = size * 1.2;
@@ -136,17 +107,9 @@ export function PortalAnimation({ size = 200 }: { size?: number }) {
         />
       </AV>
 
-      <Coin3D delay={0} sz={coinL} x={size * 0.68} y={size * 0.12} orbit={14} drift={4} dur={4200}>
-        <Ionicons name="phone-portrait" size={coinL * 0.42} color="#FFFFFF" />
-      </Coin3D>
-
-      <Coin3D delay={600} sz={coinM} x={size * 0.12} y={size * 0.08} orbit={12} drift={5} dur={4600}>
-        <Text style={[st.coinTxt, { fontSize: coinM * 0.42 }]}>৳</Text>
-      </Coin3D>
-
-      <Coin3D delay={1200} sz={coinS} x={size * 0.04} y={size * 0.48} orbit={10} drift={4} dur={5000}>
-        <Text style={[st.logoTxt, { fontSize: coinS * 0.42 }]}>$</Text>
-      </Coin3D>
+      <FloatingCoin delay={0} sz={coinL} x={size * 0.65} y={size * 0.08} orbit={16} drift={5} dur={4200} source={coinMobile} />
+      <FloatingCoin delay={600} sz={coinM} x={size * 0.06} y={size * 0.05} orbit={12} drift={6} dur={4600} source={coinTaka} />
+      <FloatingCoin delay={1200} sz={coinS} x={size * -0.02} y={size * 0.45} orbit={10} drift={4} dur={5000} source={coinDollar} />
 
       <Sparkle delay={0} x={size * 0.06} y={size * 0.06} dotSz={4.5} />
       <Sparkle delay={400} x={size * 1.02} y={size * 0.22} dotSz={3.5} />
@@ -164,40 +127,5 @@ const st = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  coinWrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2.5,
-    borderColor: 'rgba(255,255,255,0.4)',
-    backgroundColor: GREEN_DARK,
-    shadowColor: '#0D7A30',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  coinFace: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  coinShine: {
-    position: 'absolute',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-  },
-  coinEdge: {
-    overflow: 'hidden',
-    marginTop: -2,
-  },
-  coinTxt: {
-    fontFamily: 'HindSiliguri_700Bold',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-  logoTxt: {
-    fontFamily: 'HindSiliguri_700Bold',
-    color: '#FFFFFF',
-    letterSpacing: 1,
   },
 });
