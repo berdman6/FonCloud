@@ -23,7 +23,7 @@ interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<void>;
-  register: (emailOrPhone: string, referralCode: string) => Promise<void>;
+  register: (emailOrPhone: string, password: string, referralCode: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -62,8 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(data.user);
   }, []);
 
-  const register = useCallback(async (emailOrPhone: string, referralCode: string) => {
-    const res = await apiRequest('POST', '/api/auth/register', { emailOrPhone, referralCode });
+  const register = useCallback(async (emailOrPhone: string, password: string, referralCode: string) => {
+    const res = await apiRequest('POST', '/api/auth/register', { emailOrPhone, password, referralCode });
     const data = await res.json();
     setUser(data.user);
   }, []);

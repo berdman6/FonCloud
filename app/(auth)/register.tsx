@@ -15,13 +15,19 @@ export default function RegisterScreen() {
   const { t } = useLanguage();
   const colors = useThemeColors();
   const [emailOrPhone, setEmailOrPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
 
   const handleRegister = async () => {
-    if (!emailOrPhone.trim() || !referralCode.trim()) {
+    if (!emailOrPhone.trim() || !password.trim() || !referralCode.trim()) {
       Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters');
       return;
     }
     if (!agreed) {
@@ -30,7 +36,7 @@ export default function RegisterScreen() {
     }
     setLoading(true);
     try {
-      await register(emailOrPhone.trim(), referralCode.trim().toUpperCase());
+      await register(emailOrPhone.trim(), password, referralCode.trim().toUpperCase());
       router.replace('/(main)/home');
     } catch (err: any) {
       Alert.alert('Error', err.message || 'Registration failed');
@@ -78,6 +84,21 @@ export default function RegisterScreen() {
                   <Ionicons name="close-circle" size={18} color={colors.textMuted} />
                 </Pressable>
               )}
+            </View>
+
+            <View style={[styles.inputWrap, { borderColor: colors.inputBorder, backgroundColor: colors.inputBg }]}>
+              {password.length > 0 && <Text style={[styles.inputLabel, { backgroundColor: colors.card, color: colors.neonGreen }]}>Password</Text>}
+              <TextInput
+                style={[styles.input, { color: colors.text }]}
+                placeholder="Password"
+                placeholderTextColor={colors.textMuted}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.clearBtn}>
+                <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={colors.textMuted} />
+              </Pressable>
             </View>
 
             <View style={[styles.inputWrap, { borderColor: colors.inputBorder, backgroundColor: colors.inputBg }]}>

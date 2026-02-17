@@ -122,6 +122,7 @@ export const loginSchema = z.object({
 
 export const registerSchema = z.object({
   emailOrPhone: z.string().min(3),
+  password: z.string().min(6),
   referralCode: z.string().min(4),
 });
 

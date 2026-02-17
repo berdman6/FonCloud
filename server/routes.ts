@@ -125,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
       }
 
-      const { emailOrPhone, referralCode } = parsed.data;
+      const { emailOrPhone, password, referralCode } = parsed.data;
       const input = emailOrPhone.trim();
 
       const isEmail = input.includes('@');
@@ -148,7 +148,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const username = input.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().slice(0, 12) + Math.random().toString(36).slice(2, 6);
       const displayName = isEmail ? input.split('@')[0] : input;
-      const password = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
 
       let referrer = null;
 
