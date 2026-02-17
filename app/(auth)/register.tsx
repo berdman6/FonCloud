@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { FloatingBackground } from '@/components/FloatingBackground';
+import { PortalAnimation } from '@/components/PortalAnimation';
 import { useThemeColors } from '@/lib/theme-context';
 
 export default function RegisterScreen() {
@@ -52,6 +53,10 @@ export default function RegisterScreen() {
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.neonGreen} />
           </Pressable>
+
+          <View style={styles.portalWrap}>
+            <PortalAnimation size={160} />
+          </View>
 
           <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
 
@@ -137,6 +142,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
+  },
+  portalWrap: {
+    alignItems: 'center',
+    marginBottom: 16,
   },
   title: {
     fontSize: 32,

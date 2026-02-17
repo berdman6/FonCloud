@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/i18n';
 import { FloatingBackground } from '@/components/FloatingBackground';
+import { PortalAnimation } from '@/components/PortalAnimation';
 import { useThemeColors } from '@/lib/theme-context';
 
 export default function LoginScreen() {
@@ -58,6 +59,10 @@ export default function LoginScreen() {
             <Ionicons name="language" size={16} color={colors.neonGreen} />
             <Text style={[styles.langText, { color: colors.neonGreen }]}>{currentLanguage === 'bn' ? 'EN' : 'BN'}</Text>
           </Pressable>
+
+          <View style={styles.portalWrap}>
+            <PortalAnimation size={160} />
+          </View>
 
           <Text style={[styles.title, { color: colors.text }]}>{t('login')}</Text>
 
@@ -180,6 +185,10 @@ const styles = StyleSheet.create({
   langText: {
     fontFamily: 'HindSiliguri_600SemiBold',
     fontSize: 13,
+  },
+  portalWrap: {
+    alignItems: 'center',
+    marginBottom: 16,
   },
   title: {
     fontSize: 32,
