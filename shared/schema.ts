@@ -121,12 +121,8 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6),
-  displayName: z.string().min(2),
+  emailOrPhone: z.string().min(3),
   referralCode: z.string().min(4),
-  email: z.string().email().optional().or(z.literal('')),
-  phone: z.string().optional().or(z.literal('')),
 });
 
 export const transferSchema = z.object({

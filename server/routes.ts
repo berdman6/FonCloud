@@ -125,26 +125,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
       }
 
-      const { username, password, displayName, referralCode, email, phone } = parsed.data;
+      const { emailOrPhone, referralCode } = parsed.data;
+      const input = emailOrPhone.trim();
 
-      const existingUser = await storage.getUserByUsername(username);
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already taken" });
-      }
+      const isEmail = input.includes('@');
+      const email = isEmail ? input : null;
+      const phone = !isEmail ? input : null;
 
-      if (email && email.trim()) {
-        const existingEmail = await storage.getUserByEmail(email.trim());
+      if (email) {
+        const existingEmail = await storage.getUserByEmail(email);
         if (existingEmail) {
           return res.status(400).json({ message: "Email already registered" });
         }
       }
 
-      if (phone && phone.trim()) {
-        const existingPhone = await storage.getUserByPhone(phone.trim());
+      if (phone) {
+        const existingPhone = await storage.getUserByPhone(phone);
         if (existingPhone) {
           return res.status(400).json({ message: "Phone number already registered" });
         }
       }
+
+      const username = input.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().slice(0, 12) + Math.random().toString(36).slice(2, 6);
+      const displayName = isEmail ? input.split('@')[0] : input;
+      const password = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
 
       let referrer = null;
 
@@ -170,8 +174,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         username,
         password: hashedPassword,
         displayName,
-        email: email && email.trim() ? email.trim() : null,
-        phone: phone && phone.trim() ? phone.trim() : null,
+        email,
+        phone,
         referredBy: referralCode === "FONCLOUD" ? null : referrer!.userId,
       });
 

@@ -13,23 +13,14 @@ export default function RegisterScreen() {
   const { register } = useAuth();
   const { t } = useLanguage();
   const colors = useThemeColors();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [emailOrPhone, setEmailOrPhone] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
 
   const handleRegister = async () => {
-    if (!username.trim() || !password.trim() || !displayName.trim() || !referralCode.trim()) {
+    if (!emailOrPhone.trim() || !referralCode.trim()) {
       Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
       return;
     }
     if (!agreed) {
@@ -38,7 +29,7 @@ export default function RegisterScreen() {
     }
     setLoading(true);
     try {
-      await register(username.trim(), password, displayName.trim(), referralCode.trim().toUpperCase(), email.trim(), phone.trim());
+      await register(emailOrPhone.trim(), referralCode.trim().toUpperCase());
       router.replace('/(main)/home');
     } catch (err: any) {
       Alert.alert('Error', err.message || 'Registration failed');
@@ -62,57 +53,33 @@ export default function RegisterScreen() {
             <Ionicons name="arrow-back" size={24} color={colors.neonGreen} />
           </Pressable>
 
-          <Text style={[styles.title, { color: colors.text }]}>{t('register')}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
 
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
-            <InputField
-              label={t('enterDisplayName')}
-              value={displayName}
-              onChangeText={setDisplayName}
-            />
-
-            <InputField
-              label={t('enterUsername')}
-              value={username}
-              onChangeText={setUsername}
-              autoCapitalize="none"
-            />
-
-            <InputField
-              label={`${t('enterEmail')} ${t('optional')}`}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-
-            <InputField
-              label={`${t('enterPhone')} ${t('optional')}`}
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-            />
-
             <View style={[styles.inputWrap, { borderColor: colors.inputBorder, backgroundColor: colors.inputBg }]}>
-              {password.length > 0 && <Text style={[styles.inputLabel, { backgroundColor: colors.card, color: colors.neonGreen }]}>{t('enterPassword')}</Text>}
+              {emailOrPhone.length > 0 && <Text style={[styles.inputLabel, { backgroundColor: colors.card, color: colors.neonGreen }]}>Email/Phone Number</Text>}
               <TextInput
                 style={[styles.input, { color: colors.text }]}
-                placeholder={t('enterPassword')}
+                placeholder="Email/Phone Number (without country code)"
                 placeholderTextColor={colors.textMuted}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
+                value={emailOrPhone}
+                onChangeText={setEmailOrPhone}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="email-address"
               />
-              <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.clearBtn}>
-                <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={colors.textMuted} />
-              </Pressable>
+              {emailOrPhone.length > 0 && (
+                <Pressable onPress={() => setEmailOrPhone('')} style={styles.clearBtn}>
+                  <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+                </Pressable>
+              )}
             </View>
 
             <View style={[styles.inputWrap, { borderColor: colors.inputBorder, backgroundColor: colors.inputBg }]}>
-              {referralCode.length > 0 && <Text style={[styles.inputLabel, { backgroundColor: colors.card, color: colors.neonGreen }]}>{t('enterReferralCode')}</Text>}
+              {referralCode.length > 0 && <Text style={[styles.inputLabel, { backgroundColor: colors.card, color: colors.neonGreen }]}>Referral Code</Text>}
               <TextInput
                 style={[styles.input, { color: colors.text }]}
-                placeholder={t('enterReferralCode')}
+                placeholder="Referral Code"
                 placeholderTextColor={colors.textMuted}
                 value={referralCode}
                 onChangeText={setReferralCode}
@@ -121,14 +88,9 @@ export default function RegisterScreen() {
               <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
             </View>
 
-            <View style={[styles.feeNotice, { backgroundColor: colors.accentDim, borderColor: 'rgba(245, 166, 35, 0.2)' }]}>
-              <Ionicons name="information-circle" size={16} color={colors.neonOrange} />
-              <Text style={[styles.feeText, { color: colors.neonOrange }]}>Sign-up fee: 500 credits (paid by referrer)</Text>
-            </View>
-
             <Pressable onPress={() => setAgreed(!agreed)} style={styles.checkRow}>
-              <View style={[styles.checkbox, { borderColor: colors.textMuted }, agreed && { backgroundColor: colors.neonGreen, borderColor: colors.neonGreen }]}>
-                {agreed && <Ionicons name="checkmark" size={14} color="#000" />}
+              <View style={[styles.checkbox, { borderColor: colors.textMuted }, agreed && { backgroundColor: colors.text, borderColor: colors.text }]}>
+                {agreed && <Ionicons name="checkmark" size={14} color={colors.background} />}
               </View>
               <Text style={[styles.checkText, { color: colors.textSecondary }]}>
                 I have read and agree to the{' '}
@@ -142,7 +104,7 @@ export default function RegisterScreen() {
               disabled={loading}
               style={({ pressed }) => [styles.mainButton, { backgroundColor: colors.black, borderColor: colors.neonGreen, shadowColor: colors.neonGreen }, loading && { opacity: 0.5 }, pressed && { opacity: 0.85 }]}
             >
-              <Text style={[styles.mainButtonText, { color: colors.neonGreen }]}>{loading ? '...' : t('registerButton')}</Text>
+              <Text style={[styles.mainButtonText, { color: colors.neonGreen }]}>{loading ? '...' : 'Create Account'}</Text>
             </Pressable>
           </View>
 
@@ -154,37 +116,6 @@ export default function RegisterScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
-  );
-}
-
-function InputField({ label, value, onChangeText, autoCapitalize, keyboardType }: {
-  label: string;
-  value: string;
-  onChangeText: (t: string) => void;
-  autoCapitalize?: 'none' | 'characters' | 'words' | 'sentences';
-  keyboardType?: 'default' | 'email-address' | 'phone-pad';
-}) {
-  const colors = useThemeColors();
-
-  return (
-    <View style={[styles.inputWrap, { borderColor: colors.inputBorder, backgroundColor: colors.inputBg }]}>
-      {value.length > 0 && <Text style={[styles.inputLabel, { backgroundColor: colors.card, color: colors.neonGreen }]}>{label}</Text>}
-      <TextInput
-        style={[styles.input, { color: colors.text }]}
-        placeholder={label}
-        placeholderTextColor={colors.textMuted}
-        value={value}
-        onChangeText={onChangeText}
-        autoCapitalize={autoCapitalize}
-        keyboardType={keyboardType}
-        autoCorrect={false}
-      />
-      {value.length > 0 && (
-        <Pressable onPress={() => onChangeText('')} style={styles.clearBtn}>
-          <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-        </Pressable>
-      )}
     </View>
   );
 }
@@ -216,7 +147,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    gap: 14,
+    gap: 18,
   },
   inputWrap: {
     borderWidth: 1,
@@ -242,20 +173,6 @@ const styles = StyleSheet.create({
   },
   clearBtn: {
     padding: 6,
-  },
-  feeNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  feeText: {
-    fontFamily: 'HindSiliguri_400Regular',
-    fontSize: 13,
-    flex: 1,
   },
   checkRow: {
     flexDirection: 'row',
