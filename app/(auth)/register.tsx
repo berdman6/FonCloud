@@ -64,6 +64,8 @@ export default function RegisterScreen() {
             <PortalAnimation size={160} />
           </View>
 
+          <Text style={[styles.appName, { color: colors.neonGreen }]}>FonCloud</Text>
+
           <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
 
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
@@ -166,7 +168,14 @@ const styles = StyleSheet.create({
   },
   portalWrap: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
+  },
+  appName: {
+    fontSize: 28,
+    fontFamily: 'HindSiliguri_700Bold',
+    textAlign: 'center',
+    letterSpacing: 1,
+    marginBottom: 4,
   },
   title: {
     fontSize: 32,
