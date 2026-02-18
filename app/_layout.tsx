@@ -1,3 +1,4 @@
+import { vexo } from 'vexo-analytics';
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -14,6 +15,12 @@ import { NotificationsProvider } from "@/lib/notifications-context";
 import { ThemeProvider, useTheme } from "@/lib/theme-context";
 
 SplashScreen.preventAutoHideAsync();
+
+// Initialize Vexo at the root level, outside of any component
+// Recommended to wrap in production-only check
+if (__DEV__ === false) {
+  vexo('a4e9b262-967f-4d4c-9159-88e121c0cbf6');
+}
 
 function ThemedStatusBar() {
   const { isDark } = useTheme();

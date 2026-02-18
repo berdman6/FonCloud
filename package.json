@@ -68,7 +68,8 @@
     "tsx": "^4.20.6",
     "ws": "^8.18.0",
     "zod": "^3.24.2",
-    "zod-validation-error": "^3.4.0"
+    "zod-validation-error": "^3.4.0",
+    "vexo-analytics": "1.5.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
