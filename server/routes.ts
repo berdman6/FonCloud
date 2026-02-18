@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "node:http";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
+import pg from "pg";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import {
@@ -97,21 +98,26 @@ function toNum(val: string | null | undefined): number {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const PgStore = connectPgSimple(session);
+  const sessionPool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 2,
+  });
 
   app.use(
     session({
       store: new PgStore({
-        conString: process.env.DATABASE_URL,
+        pool: sessionPool,
         createTableIfMissing: true,
       }),
       secret: process.env.SESSION_SECRET || "foncloud-secret-key",
       resave: false,
       saveUninitialized: false,
+      proxy: true,
       cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: false,
-        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       },
     }),
   );
