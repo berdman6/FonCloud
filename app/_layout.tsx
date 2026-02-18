@@ -5,7 +5,9 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { StatusBar } from "expo-status-bar";
+import { Platform } from "react-native";
 import { useFonts, HindSiliguri_300Light, HindSiliguri_400Regular, HindSiliguri_500Medium, HindSiliguri_600SemiBold, HindSiliguri_700Bold } from "@expo-google-fonts/hind-siliguri";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/query-client";
 import { AuthProvider } from "@/lib/auth-context";
@@ -58,6 +60,7 @@ export default function RootLayout() {
                   <KeyboardProvider>
                     <ThemedStatusBar />
                     <RootLayoutNav />
+                    {Platform.OS === 'web' && <SpeedInsights />}
                   </KeyboardProvider>
                 </GestureHandlerRootView>
               </ThemeProvider>
